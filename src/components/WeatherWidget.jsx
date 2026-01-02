@@ -33,11 +33,17 @@ export default function WeatherWidget() {
         }
       }
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 8000);
-      const res = await fetch(url, { signal: controller.signal, mode: 'cors' });
+      const timeout = (ms) => new Promise((resolve) => setTimeout(() => resolve(null), ms));
+      const res = await Promise.race([fetch(url, { mode: 'cors' }), timeout(8000)]);
+      if (!res) {
+        setError('Sin conexión para clima');
+        return;
+      }
+      if (!res.ok) {
+        setError('Sin conexión para clima');
+        return;
+      }
       const data = await res.json();
-      clearTimeout(timer);
       setWeather({
         temp: data?.current?.temperature_2m,
         isDay: data?.current?.is_day,
