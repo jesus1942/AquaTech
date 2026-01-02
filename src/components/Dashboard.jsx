@@ -25,58 +25,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {showCal && <CalendarModal onClose={() => setShowCal(false)} />}
-      <WeatherWidget />
-      <div className="card rounded-2xl p-4 shadow-sm">
-        <h3 className="text-sm font-bold text-theme mb-3">Ubicación Clima</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-xs text-muted">Ciudad</label>
-            <select
-              className="p-2 rounded-lg w-full"
-              onChange={(e) => {
-                const city = cities.find(c => c.name === e.target.value);
-                if (city) {
-                  setLatInput(city.lat);
-                  setLonInput(city.lon);
-                  setConfig({ ...config, weatherLocation: { lat: city.lat, lon: city.lon } });
-                }
-              }}
-            >
-              <option value="">Seleccionar ciudad</option>
-              {cities.map(c => (
-                <option key={c.name} value={c.name}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs text-muted">Coordenadas</label>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="number"
-                step="0.0001"
-                value={latInput}
-                onChange={(e) => setLatInput(parseFloat(e.target.value))}
-                className="flex-1 p-2 rounded-lg"
-                placeholder="Latitud"
-              />
-              <input
-                type="number"
-                step="0.0001"
-                value={lonInput}
-                onChange={(e) => setLonInput(parseFloat(e.target.value))}
-                className="flex-1 p-2 rounded-lg"
-                placeholder="Longitud"
-              />
-              <button
-                onClick={() => setConfig({ ...config, weatherLocation: { lat: latInput, lon: lonInput } })}
-                className="px-3 py-2 btn-primary rounded-lg text-sm"
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      
+      {/* 1. Resumen (Stats) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="card rounded-2xl p-4 shadow-sm">
           <p className="text-xs text-muted">Citas Hoy</p>
@@ -94,6 +44,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* 2. Próximas Citas */}
       <div className="card rounded-2xl p-4 shadow-sm">
         <h3 className="text-sm font-bold text-theme mb-3">Próximas Citas</h3>
         <div className="flex justify-end mb-2">
@@ -119,31 +70,87 @@ export default function Dashboard() {
         </ul>
       </div>
 
-      
+      {/* 3. Clima */}
+      <WeatherWidget />
 
-      <div className="card rounded-2xl p-4 shadow-sm">
-        <h3 className="text-sm font-bold text-theme mb-3">Tarifario</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {tarifario.map((t, idx) => (
-            <div key={t.tarea} className="flex items-center justify-between gap-2">
-              <span className="text-sm text-theme">{t.tarea}</span>
-              <input
-                type="number"
-                className="w-full sm:w-32 p-2 rounded-lg text-right"
-                value={t.precioBase}
+      {/* 4. Configuración (Ubicación y Tarifario) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="card rounded-2xl p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-theme mb-3">Ubicación Clima</h3>
+          <div className="grid grid-cols-1 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs text-muted">Ciudad</label>
+              <select
+                className="p-2 rounded-lg w-full"
                 onChange={(e) => {
-                  const val = parseFloat(e.target.value) || 0;
-                  const next = [...tarifario];
-                  next[idx] = { ...next[idx], precioBase: val };
-                  setTarifario(next);
+                  const city = cities.find(c => c.name === e.target.value);
+                  if (city) {
+                    setLatInput(city.lat);
+                    setLonInput(city.lon);
+                    setConfig({ ...config, weatherLocation: { lat: city.lat, lon: city.lon } });
+                  }
                 }}
-              />
+              >
+                <option value="">Seleccionar ciudad</option>
+                {cities.map(c => (
+                  <option key={c.name} value={c.name}>{c.name}</option>
+                ))}
+              </select>
             </div>
-          ))}
+            <div className="space-y-1">
+              <label className="text-xs text-muted">Coordenadas</label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={latInput}
+                  onChange={(e) => setLatInput(parseFloat(e.target.value))}
+                  className="flex-1 p-2 rounded-lg"
+                  placeholder="Latitud"
+                />
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={lonInput}
+                  onChange={(e) => setLonInput(parseFloat(e.target.value))}
+                  className="flex-1 p-2 rounded-lg"
+                  placeholder="Longitud"
+                />
+                <button
+                  onClick={() => setConfig({ ...config, weatherLocation: { lat: latInput, lon: lonInput } })}
+                  className="px-3 py-2 btn-primary rounded-lg text-sm"
+                >
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="text-xs text-muted mt-2">
-          Los precios estimados se aplican al agendar nuevas citas.
-        </p>
+
+        <div className="card rounded-2xl p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-theme mb-3">Tarifario</h3>
+          <div className="grid grid-cols-1 gap-3">
+            {tarifario.map((t, idx) => (
+              <div key={t.tarea} className="flex items-center justify-between gap-2">
+                <span className="text-sm text-theme">{t.tarea}</span>
+                <input
+                  type="number"
+                  className="w-24 p-2 rounded-lg text-right"
+                  value={t.precioBase}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value) || 0;
+                    const next = [...tarifario];
+                    next[idx] = { ...next[idx], precioBase: val };
+                    setTarifario(next);
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted mt-2">
+            Precios estimados para nuevas citas.
+          </p>
+        </div>
       </div>
     </div>
   );
