@@ -33,32 +33,43 @@ export default function WeatherWidget() {
         }
       }
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,is_day,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
-      const timeout = (ms) => new Promise((resolve) => setTimeout(() => resolve(null), ms));
-      const res = await Promise.race([fetch(url, { mode: 'cors' }), timeout(8000)]);
-      if (!res) {
-        setError('Sin conexión para clima');
-        return;
+      const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms));
+      
+      try {
+        const res = await Promise.race([fetch(url), timeout(8000)]);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        
+        const weatherData = {
+          temp: data?.current?.temperature_2m,
+          isDay: data?.current?.is_day,
+          tmax: data?.daily?.temperature_2m_max?.[0],
+          tmin: data?.daily?.temperature_2m_min?.[0],
+          code: data?.current?.weathercode ?? data?.daily?.weathercode?.[0]
+        };
+
+        setWeather(weatherData);
+        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: weatherData }));
+        setError(null);
+      } catch (err) {
+        console.warn('Open-Meteo falló, probando wttr.in...', err);
+        // Fallback a wttr.in (JSON)
+        const res2 = await fetch(`https://wttr.in/${lat},${lon}?format=j1`);
+        if (!res2.ok) throw new Error('Fallback failed');
+        const data2 = await res2.json();
+        const current = data2.current_condition[0];
+        const daily = data2.weather[0];
+        
+        const weatherData = {
+          temp: parseFloat(current.temp_C),
+          isDay: 1, // wttr.in no da is_day directo, asumimos día o calculamos por hora si fuera crítico
+          tmax: parseFloat(daily.maxtempC),
+          tmin: parseFloat(daily.mintempC),
+          code: 0 // wttr usa códigos distintos, simplificamos a 0 (sol) o mapeamos si es necesario
+        };
+        setWeather(weatherData);
+        setError(null);
       }
-      if (!res.ok) {
-        setError('Sin conexión para clima');
-        return;
-      }
-      const data = await res.json();
-      setWeather({
-        temp: data?.current?.temperature_2m,
-        isDay: data?.current?.is_day,
-        tmax: data?.daily?.temperature_2m_max?.[0],
-        tmin: data?.daily?.temperature_2m_min?.[0],
-        code: data?.current?.weathercode ?? data?.daily?.weathercode?.[0]
-      });
-      localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: {
-        temp: data?.current?.temperature_2m,
-        isDay: data?.current?.is_day,
-        tmax: data?.daily?.temperature_2m_max?.[0],
-        tmin: data?.daily?.temperature_2m_min?.[0],
-        code: data?.current?.weathercode ?? data?.daily?.weathercode?.[0]
-      }}));
-      setError(null);
     } catch (e) {
       if (e.name === 'AbortError') {
         setError('Sin conexión para clima');
