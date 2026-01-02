@@ -9,7 +9,7 @@ export default defineConfig({
 
   // Genera HTML estático para Capacitor
   output: 'static',
-  site: 'https://jesus1942.github.io/AquaTech',
+  site: 'https://jesus1942.github.io',
   base: '/AquaTech',
 
   build: {
