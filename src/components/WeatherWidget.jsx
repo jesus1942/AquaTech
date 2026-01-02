@@ -22,10 +22,20 @@ export default function WeatherWidget() {
           () => {}
         );
       }
+      const cacheKey = `weatherCache:${lat},${lon}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - parsed.ts < 30 * 60 * 1000) {
+          setWeather(parsed.data);
+          setError(null);
+          return;
+        }
+      }
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 4000);
-      const res = await fetch(url, { signal: controller.signal });
+      const timer = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(url, { signal: controller.signal, mode: 'cors' });
       const data = await res.json();
       clearTimeout(timer);
       setWeather({
@@ -35,8 +45,19 @@ export default function WeatherWidget() {
         tmin: data?.daily?.temperature_2m_min?.[0],
         code: data?.daily?.weathercode?.[0]
       });
+      localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: {
+        temp: data?.current?.temperature_2m,
+        isDay: data?.current?.is_day,
+        tmax: data?.daily?.temperature_2m_max?.[0],
+        tmin: data?.daily?.temperature_2m_min?.[0],
+        code: data?.daily?.weathercode?.[0]
+      }}));
       setError(null);
     } catch (e) {
+      if (e.name === 'AbortError') {
+        setError('Sin conexión para clima');
+        return;
+      }
       setError('Sin conexión para clima');
     }
   };
