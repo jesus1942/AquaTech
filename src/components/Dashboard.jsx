@@ -80,22 +80,47 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 gap-3">
             <div className="space-y-1">
               <label className="text-xs text-muted">Ciudad</label>
-              <select
-                className="p-2 rounded-lg w-full"
-                onChange={(e) => {
-                  const city = cities.find(c => c.name === e.target.value);
-                  if (city) {
-                    setLatInput(city.lat);
-                    setLonInput(city.lon);
-                    setConfig({ ...config, weatherLocation: { lat: city.lat, lon: city.lon } });
-                  }
-                }}
-              >
-                <option value="">Seleccionar ciudad</option>
-                {cities.map(c => (
-                  <option key={c.name} value={c.name}>{c.name}</option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  className="p-2 rounded-lg w-full"
+                  onChange={(e) => {
+                    const city = cities.find(c => c.name === e.target.value);
+                    if (city) {
+                      setLatInput(city.lat);
+                      setLonInput(city.lon);
+                      setConfig({ ...config, weatherLocation: { lat: city.lat, lon: city.lon } });
+                    }
+                  }}
+                >
+                  <option value="">Seleccionar ciudad</option>
+                  {cities.map(c => (
+                    <option key={c.name} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => {
+                    if ('geolocation' in navigator) {
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const { latitude, longitude } = pos.coords;
+                          setLatInput(latitude);
+                          setLonInput(longitude);
+                          setConfig({ ...config, weatherLocation: { lat: latitude, lon: longitude } });
+                        },
+                        (err) => {
+                          alert('Error al obtener ubicación: ' + err.message);
+                        }
+                      );
+                    } else {
+                      alert('Geolocalización no soportada en este navegador');
+                    }
+                  }}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg text-xs whitespace-nowrap"
+                  title="Usar mi ubicación actual"
+                >
+                  📍 Mi Ubicación
+                </button>
+              </div>
             </div>
             <div className="space-y-1">
               <label className="text-xs text-muted">Coordenadas</label>
