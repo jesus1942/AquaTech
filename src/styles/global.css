@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .min-h-screen-ios {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  .scroll-touch {
+    -webkit-overflow-scrolling: touch;
+  }
+  .tap-highlight-none {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --text: #111827;
+  --muted: #6b7280;
+  --primary: #1d4ed8;
+  --header: #0ea5e9;
+}
+body.dark {
+  --bg: #0f172a;
+  --surface: #0b1220;
+  --border: #1f2937;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --primary: #60a5fa;
+  --header: #0b1220;
+}
+
+.app-bg { background-color: var(--bg); }
+.app-header { background-color: var(--header); color: #ffffff; }
+.app-nav { background-color: var(--surface); border-top: 1px solid var(--border); }
+.card { background-color: var(--surface); border: 1px solid var(--border); }
+.text-theme { color: var(--text); }
+.text-muted { color: var(--muted); }
+.border-theme { border-color: var(--border); }
+.btn-primary { background-color: var(--primary); color: #fff; }
+
+input, select, textarea {
+  background-color: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
