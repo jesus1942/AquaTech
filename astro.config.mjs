@@ -9,6 +9,8 @@ export default defineConfig({
 
   // Genera HTML estático para Capacitor
   output: 'static',
+  site: 'https://jesus1942.github.io/AquaTech',
+  base: '/AquaTech',
 
   build: {
     outDir: 'dist', // Carpeta de salida estándar para Capacitor
