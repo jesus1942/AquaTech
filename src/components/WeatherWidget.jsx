@@ -68,33 +68,41 @@ export default function WeatherWidget() {
         setError(null);
       } catch (err) {
         console.warn('Open-Meteo falló, probando wttr.in...', err);
-        // Fallback a wttr.in (JSON)
-        const res2 = await fetch(`https://wttr.in/${lat},${lon}?format=j1`);
-        if (!res2.ok) throw new Error('Fallback failed');
-        const data2 = await res2.json();
-        const current = data2.current_condition[0];
-        const daily = data2.weather[0];
         
-        const weatherData = {
-          temp: parseFloat(current.temp_C),
-          isDay: 1, 
-          tmax: parseFloat(daily.maxtempC),
-          tmin: parseFloat(daily.mintempC),
-          code: 0,
-          humidity: parseFloat(current.humidity),
-          pressure: parseFloat(current.pressure),
-          wind: parseFloat(current.windspeedKmph),
-          uv: parseFloat(daily.uvIndex),
-          source: 'backup',
-          forecast: data2.weather.slice(1).map(d => ({
-            date: d.date,
-            max: parseFloat(d.maxtempC),
-            min: parseFloat(d.mintempC),
-            code: 0
-          }))
-        };
-        setWeather(weatherData);
-        setError(null);
+        try {
+          // Fallback a wttr.in (JSON) con timeout también
+          const timeoutFallback = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Fallback')), ms));
+          const res2 = await Promise.race([fetch(`https://wttr.in/${lat},${lon}?format=j1`), timeoutFallback(5000)]);
+          
+          if (!res2.ok) throw new Error('Fallback failed');
+          const data2 = await res2.json();
+          const current = data2.current_condition[0];
+          const daily = data2.weather[0];
+          
+          const weatherData = {
+            temp: parseFloat(current.temp_C),
+            isDay: 1, 
+            tmax: parseFloat(daily.maxtempC),
+            tmin: parseFloat(daily.mintempC),
+            code: 0,
+            humidity: parseFloat(current.humidity),
+            pressure: parseFloat(current.pressure),
+            wind: parseFloat(current.windspeedKmph),
+            uv: parseFloat(daily.uvIndex),
+            source: 'backup',
+            forecast: data2.weather.slice(1).map(d => ({
+              date: d.date,
+              max: parseFloat(d.maxtempC),
+              min: parseFloat(d.mintempC),
+              code: 0
+            }))
+          };
+          setWeather(weatherData);
+          setError(null);
+        } catch (err2) {
+          console.error('Ambos proveedores fallaron', err2);
+          setError('No se pudo cargar el clima. Verifica tu conexión.');
+        }
       }
     } catch (e) {
       // ...
