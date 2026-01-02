@@ -155,13 +155,13 @@ function AppShell() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto p-4 max-w-lg mb-16">
+      <main className="container mx-auto p-4 max-w-lg md:max-w-5xl mb-16">
         {renderContent()}
       </main>
 
       {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 app-nav shadow-lg z-20 pb-safe">
-        <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
+        <div className="flex justify-around items-center h-16 max-w-lg md:max-w-5xl mx-auto">
             <button 
                 onClick={() => { setActiveTab('dashboard'); setClienteSeleccionado(null); }}
                 className={`flex flex-col items-center justify-center w-full h-full ${activeTab === 'dashboard' && !clienteSeleccionado ? 'text-blue-600' : 'text-gray-400'}`}

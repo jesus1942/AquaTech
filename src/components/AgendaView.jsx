@@ -93,14 +93,14 @@ export default function AgendaView({ onSelectCliente }) {
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 animate-fade-in-up">
-            <h3 className="font-bold text-lg text-gray-800 mb-4">Agendar Visita</h3>
+        <div className="card p-6 rounded-3xl shadow-xl border border-theme animate-fade-in-up">
+            <h3 className="font-bold text-lg text-theme mb-4">Agendar Visita</h3>
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Cliente</label>
+                    <label className="text-xs font-semibold text-muted uppercase tracking-wider ml-1">Cliente</label>
                     <div className="relative">
                         <select 
-                            className="w-full p-4 bg-white border border-gray-300 rounded-2xl text-gray-900 font-medium focus:ring-2 focus:ring-blue-500 appearance-none"
+                            className="w-full p-4 rounded-2xl text-theme font-medium focus:ring-2 focus:ring-blue-500 appearance-none"
                             value={nuevaCita.clienteId}
                             onChange={e => setNuevaCita({...nuevaCita, clienteId: e.target.value})}
                             required
@@ -110,7 +110,7 @@ export default function AgendaView({ onSelectCliente }) {
                                 <option key={c.id} value={c.id}>{c.nombre}</option>
                             ))}
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-muted">
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
@@ -118,20 +118,20 @@ export default function AgendaView({ onSelectCliente }) {
                 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Fecha</label>
+                        <label className="text-xs font-semibold text-muted uppercase tracking-wider ml-1">Fecha</label>
                         <input 
                             type="date" 
-                            className="w-full p-4 bg-gray-50 border-none rounded-2xl text-gray-900 font-medium text-base focus:ring-2 focus:ring-blue-500 min-h-[56px]"
+                            className="w-full p-4 rounded-2xl text-theme font-medium text-base focus:ring-2 focus:ring-blue-500 min-h-[56px]"
                             value={nuevaCita.fecha}
                             onChange={e => setNuevaCita({...nuevaCita, fecha: e.target.value})}
                             required
                         />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Hora</label>
+                        <label className="text-xs font-semibold text-muted uppercase tracking-wider ml-1">Hora</label>
                         <input 
                             type="time" 
-                            className="w-full p-4 bg-gray-50 border-none rounded-2xl text-gray-900 font-medium text-base focus:ring-2 focus:ring-blue-500 min-h-[56px]"
+                            className="w-full p-4 rounded-2xl text-theme font-medium text-base focus:ring-2 focus:ring-blue-500 min-h-[56px]"
                             value={nuevaCita.hora}
                             onChange={e => setNuevaCita({...nuevaCita, hora: e.target.value})}
                             required
@@ -140,10 +140,10 @@ export default function AgendaView({ onSelectCliente }) {
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Tipo de Trabajo</label>
+                    <label className="text-xs font-semibold text-muted uppercase tracking-wider ml-1">Tipo de Trabajo</label>
                     <div className="relative">
                         <select 
-                            className="w-full p-4 bg-white border border-gray-300 rounded-2xl text-gray-900 font-medium focus:ring-2 focus:ring-blue-500 appearance-none"
+                            className="w-full p-4 rounded-2xl text-theme font-medium focus:ring-2 focus:ring-blue-500 appearance-none"
                             value={nuevaCita.tipo}
                             onChange={e => setNuevaCita({...nuevaCita, tipo: e.target.value})}
                         >
@@ -152,13 +152,13 @@ export default function AgendaView({ onSelectCliente }) {
                             <option value="Reparación">Reparación</option>
                             <option value="Visita Técnica">Visita Técnica</option>
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-muted">
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:bg-blue-700 active:scale-95 transition-all">
+                <button type="submit" className="w-full btn-primary py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">
                     Confirmar y Enviar WhatsApp
                 </button>
             </form>
@@ -167,12 +167,12 @@ export default function AgendaView({ onSelectCliente }) {
 
       <div className="space-y-4">
         {citasFuturas.length === 0 && !showForm && (
-                <div className="text-center py-16 px-4 bg-white rounded-3xl shadow-sm border border-gray-100">
+                <div className="text-center py-16 px-4 card rounded-3xl shadow-sm">
                 <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" strokeWidth="2"></rect><path d="M16 2v4M8 2v4M3 10h18" strokeWidth="2" strokeLinecap="round"></path></svg>
+                    <svg className="w-8 h-8 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" strokeWidth="2"></rect><path d="M16 2v4M8 2v4M3 10h18" strokeWidth="2" strokeLinecap="round"></path></svg>
                 </div>
-                <h3 className="text-gray-900 font-bold text-lg">Todo despejado</h3>
-                <p className="text-gray-500 mt-1">No tienes citas programadas próximamente.</p>
+                <h3 className="text-theme font-bold text-lg">Todo despejado</h3>
+                <p className="text-muted mt-1">No tienes citas programadas próximamente.</p>
                 <button onClick={() => setShowForm(true)} className="mt-4 text-blue-600 font-semibold text-sm">Crear primera cita</button>
                 </div>
         )}
@@ -184,7 +184,7 @@ export default function AgendaView({ onSelectCliente }) {
                 <div 
                     key={cita.id} 
                     onClick={() => handleCardClick(cita.clienteId)}
-                    className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex justify-between items-center group cursor-pointer active:scale-[0.98] transform transition-transform"
+                    className="card p-5 rounded-3xl shadow-sm hover:shadow-md transition-shadow flex justify-between items-center group cursor-pointer active:scale-[0.98] transform transition-transform"
                 >
                     <div className="flex gap-4 items-center">
                         <div className="bg-blue-50 text-blue-600 w-14 h-14 rounded-2xl flex flex-col items-center justify-center flex-shrink-0">
@@ -192,13 +192,13 @@ export default function AgendaView({ onSelectCliente }) {
                             <span className="text-xl font-bold leading-none">{fechaObj.getDate()}</span>
                         </div>
                         <div>
-                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">{cita.tipo}</p>
-                            <h4 className="font-bold text-gray-900 text-lg leading-tight">{cliente ? cliente.nombre : 'Cliente Eliminado'}</h4>
-                            <div className="text-gray-500 text-sm font-medium mt-1">
+                            <p className="text-xs font-semibold text-muted uppercase tracking-wide mb-0.5">{cita.tipo}</p>
+                            <h4 className="font-bold text-theme text-lg leading-tight">{cliente ? cliente.nombre : 'Cliente Eliminado'}</h4>
+                            <div className="text-muted text-sm font-medium mt-1">
                                 {fechaObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} hs
                             </div>
                             {typeof cita.precioEstimado === 'number' && (
-                              <div className="text-xs text-gray-500 mt-1">
+                              <div className="text-xs text-muted mt-1">
                                 {(config?.moneda || 'ARS')} {Math.round(cita.precioEstimado).toLocaleString()}
                               </div>
                             )}

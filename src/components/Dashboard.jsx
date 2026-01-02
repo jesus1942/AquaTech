@@ -50,7 +50,7 @@ export default function Dashboard() {
           </div>
           <div className="space-y-1">
             <label className="text-xs text-muted">Coordenadas</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="number"
                 step="0.0001"
@@ -77,29 +77,29 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500">Citas Hoy</p>
-          <p className="text-2xl font-bold text-gray-900">{citasHoy.length}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="card rounded-2xl p-4 shadow-sm">
+          <p className="text-xs text-muted">Citas Hoy</p>
+          <p className="text-2xl font-bold text-theme">{citasHoy.length}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500">Clientes</p>
-          <p className="text-2xl font-bold text-gray-900">{clientes.length}</p>
+        <div className="card rounded-2xl p-4 shadow-sm">
+          <p className="text-xs text-muted">Clientes</p>
+          <p className="text-2xl font-bold text-theme">{clientes.length}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-gray-500">Ingresos Hoy</p>
-          <p className="text-2xl font-bold text-gray-900">
+        <div className="card rounded-2xl p-4 shadow-sm">
+          <p className="text-xs text-muted">Ingresos Hoy</p>
+          <p className="text-2xl font-bold text-theme">
             {moneda} {Math.round(ingresosHoy).toLocaleString()}
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-        <h3 className="text-sm font-bold text-gray-700 mb-3">Próximas Citas</h3>
+      <div className="card rounded-2xl p-4 shadow-sm">
+        <h3 className="text-sm font-bold text-theme mb-3">Próximas Citas</h3>
         <div className="flex justify-end mb-2">
           <button
             onClick={() => setShowCal(true)}
-            className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs"
+            className="px-3 py-2 btn-primary rounded-lg text-xs"
           >
             Ver Calendario
           </button>
@@ -107,14 +107,14 @@ export default function Dashboard() {
         <ul className="space-y-3">
           {citasHoy.slice(0,3).map(c => (
             <li key={c.id} className="flex justify-between items-center">
-              <span className="text-gray-800 text-sm">
+              <span className="text-theme text-sm">
                 {new Date(c.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
               </span>
-              <span className="text-gray-500 text-xs">{c.tipo}</span>
+              <span className="text-muted text-xs">{c.tipo}</span>
             </li>
           ))}
           {citasHoy.length === 0 && (
-            <p className="text-gray-500 text-sm">No hay citas para hoy.</p>
+            <p className="text-muted text-sm">No hay citas para hoy.</p>
           )}
         </ul>
       </div>
@@ -123,13 +123,13 @@ export default function Dashboard() {
 
       <div className="card rounded-2xl p-4 shadow-sm">
         <h3 className="text-sm font-bold text-theme mb-3">Tarifario</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {tarifario.map((t, idx) => (
             <div key={t.tarea} className="flex items-center justify-between gap-2">
               <span className="text-sm text-theme">{t.tarea}</span>
               <input
                 type="number"
-                className="w-32 p-2 rounded-lg text-right"
+                className="w-full sm:w-32 p-2 rounded-lg text-right"
                 value={t.precioBase}
                 onChange={(e) => {
                   const val = parseFloat(e.target.value) || 0;
