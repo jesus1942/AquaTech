@@ -73,23 +73,23 @@ export default function WeatherWidget() {
   })();
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-4">
+    <div className="card rounded-2xl p-4 shadow-sm flex items-center gap-4">
       <div>{iconEl}</div>
       <div>
-        <p className="text-sm text-gray-500">Clima Hoy</p>
+        <p className="text-sm text-muted">Clima Hoy</p>
         {error && (
           <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-500">{error}</p>
+            <p className="text-sm text-muted">{error}</p>
             <button
               onClick={loadWeather}
-              className="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200"
+              className="text-xs px-2 py-1 rounded hover:bg-gray-200"
             >
               Reintentar
             </button>
           </div>
         )}
         {!error && (
-          <p className="text-lg font-bold text-gray-900">
+          <p className="text-lg font-bold text-theme">
             {weather ? `${Math.round(weather.temp)}°C` : '...'} 
             <span className="text-xs text-gray-500 ml-2">
               {weather ? `Max ${Math.round(weather.tmax)}° / Min ${Math.round(weather.tmin)}°` : ''}
