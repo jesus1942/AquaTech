@@ -11,6 +11,14 @@
     </style>
   </head>
   <body>
+    <script>
+      (function(){
+        var base = '/AquaTech/';
+        if (location && location.pathname.indexOf(base) !== 0) {
+          location.replace(base);
+        }
+      })();
+    </script>
     <div class="card">
       <h1>404 — Página no encontrada</h1>
       <p>Verifica la URL y el uso del subdirectorio del proyecto.</p>

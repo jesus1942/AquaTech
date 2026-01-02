@@ -25,56 +25,54 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {showCal && <CalendarModal onClose={() => setShowCal(false)} />}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <WeatherWidget />
-        <div className="card rounded-2xl p-4 shadow-sm">
-          <h3 className="text-sm font-bold text-theme mb-3">Ubicación Clima</h3>
-          <div className="grid grid-cols-1 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs text-muted">Ciudad</label>
-              <select
-                className="p-2 rounded-lg w-full"
-                onChange={(e) => {
-                  const city = cities.find(c => c.name === e.target.value);
-                  if (city) {
-                    setLatInput(city.lat);
-                    setLonInput(city.lon);
-                    setConfig({ ...config, weatherLocation: { lat: city.lat, lon: city.lon } });
-                  }
-                }}
+      <WeatherWidget />
+      <div className="card rounded-2xl p-4 shadow-sm">
+        <h3 className="text-sm font-bold text-theme mb-3">Ubicación Clima</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs text-muted">Ciudad</label>
+            <select
+              className="p-2 rounded-lg w-full"
+              onChange={(e) => {
+                const city = cities.find(c => c.name === e.target.value);
+                if (city) {
+                  setLatInput(city.lat);
+                  setLonInput(city.lon);
+                  setConfig({ ...config, weatherLocation: { lat: city.lat, lon: city.lon } });
+                }
+              }}
+            >
+              <option value="">Seleccionar ciudad</option>
+              {cities.map(c => (
+                <option key={c.name} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted">Coordenadas</label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                step="0.0001"
+                value={latInput}
+                onChange={(e) => setLatInput(parseFloat(e.target.value))}
+                className="flex-1 p-2 rounded-lg"
+                placeholder="Latitud"
+              />
+              <input
+                type="number"
+                step="0.0001"
+                value={lonInput}
+                onChange={(e) => setLonInput(parseFloat(e.target.value))}
+                className="flex-1 p-2 rounded-lg"
+                placeholder="Longitud"
+              />
+              <button
+                onClick={() => setConfig({ ...config, weatherLocation: { lat: latInput, lon: lonInput } })}
+                className="px-3 py-2 btn-primary rounded-lg text-sm"
               >
-                <option value="">Seleccionar ciudad</option>
-                {cities.map(c => (
-                  <option key={c.name} value={c.name}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs text-muted">Coordenadas</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={latInput}
-                  onChange={(e) => setLatInput(parseFloat(e.target.value))}
-                  className="flex-1 p-2 rounded-lg"
-                  placeholder="Latitud"
-                />
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={lonInput}
-                  onChange={(e) => setLonInput(parseFloat(e.target.value))}
-                  className="flex-1 p-2 rounded-lg"
-                  placeholder="Longitud"
-                />
-                <button
-                  onClick={() => setConfig({ ...config, weatherLocation: { lat: latInput, lon: lonInput } })}
-                  className="px-3 py-2 btn-primary rounded-lg text-sm"
-                >
-                  Guardar
-                </button>
-              </div>
+                Guardar
+              </button>
             </div>
           </div>
         </div>
