@@ -158,7 +158,13 @@ export default function Dashboard() {
                   placeholder="Longitud"
                 />
                 <button
-                  onClick={() => setConfig({ ...config, weatherLocation: { lat: latInput, lon: lonInput } })}
+                  onClick={() => {
+                    const newConfig = { ...config, weatherLocation: { lat: latInput, lon: lonInput } };
+                    setConfig(newConfig);
+                    // Force re-render of weather widget if needed via config change, 
+                    // but the setConfig already triggers store updates.
+                    // alert('Ubicación guardada'); // Feedback opcional
+                  }}
                   className="px-3 py-2 btn-primary rounded-lg text-sm"
                 >
                   Guardar
