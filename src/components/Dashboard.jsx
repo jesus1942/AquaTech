@@ -14,6 +14,16 @@ export default function Dashboard() {
   const [showCal, setShowCal] = useState(false);
   const [latInput, setLatInput] = useState(config?.weatherLocation?.lat ?? -34.6037);
   const [lonInput, setLonInput] = useState(config?.weatherLocation?.lon ?? -58.3816);
+  const [locLoading, setLocLoading] = useState(false);
+
+  // Sincronizar inputs cuando cambia la config (ej. al usar geolocalización)
+  React.useEffect(() => {
+    if (config?.weatherLocation) {
+      setLatInput(config.weatherLocation.lat);
+      setLonInput(config.weatherLocation.lon);
+    }
+  }, [config?.weatherLocation]);
+
   const cities = [
     { name: 'Buenos Aires', lat: -34.6037, lon: -58.3816 },
     { name: 'Córdoba', lat: -31.4201, lon: -64.1888 },
@@ -100,25 +110,30 @@ export default function Dashboard() {
                 <button
                   onClick={() => {
                     if ('geolocation' in navigator) {
+                      setLocLoading(true);
                       navigator.geolocation.getCurrentPosition(
                         (pos) => {
                           const { latitude, longitude } = pos.coords;
-                          setLatInput(latitude);
-                          setLonInput(longitude);
+                          // setLatInput/setLonInput se actualizan via useEffect
                           setConfig({ ...config, weatherLocation: { lat: latitude, lon: longitude } });
+                          setLocLoading(false);
+                          // alert('Ubicación actualizada correctamente'); // Opcional, feedback
                         },
                         (err) => {
+                          setLocLoading(false);
                           alert('Error al obtener ubicación: ' + err.message);
-                        }
+                        },
+                        { timeout: 10000, enableHighAccuracy: true }
                       );
                     } else {
                       alert('Geolocalización no soportada en este navegador');
                     }
                   }}
-                  className="px-3 py-2 bg-green-600 text-white rounded-lg text-xs whitespace-nowrap"
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg text-xs whitespace-nowrap flex items-center gap-1"
+                  disabled={locLoading}
                   title="Usar mi ubicación actual"
                 >
-                  📍 Mi Ubicación
+                  {locLoading ? 'Buscando...' : '📍 Mi Ubicación'}
                 </button>
               </div>
             </div>

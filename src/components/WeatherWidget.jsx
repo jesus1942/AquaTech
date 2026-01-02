@@ -36,7 +36,7 @@ export default function WeatherWidget() {
       const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms));
       
       try {
-        const res = await Promise.race([fetch(url), timeout(8000)]);
+        const res = await Promise.race([fetch(url), timeout(5000)]);
         if (!res.ok) throw new Error('API Error');
         const data = await res.json();
         
@@ -62,20 +62,17 @@ export default function WeatherWidget() {
         
         const weatherData = {
           temp: parseFloat(current.temp_C),
-          isDay: 1, // wttr.in no da is_day directo, asumimos día o calculamos por hora si fuera crítico
+          isDay: 1, 
           tmax: parseFloat(daily.maxtempC),
           tmin: parseFloat(daily.mintempC),
-          code: 0 // wttr usa códigos distintos, simplificamos a 0 (sol) o mapeamos si es necesario
+          code: 0,
+          source: 'backup'
         };
         setWeather(weatherData);
         setError(null);
       }
     } catch (e) {
-      if (e.name === 'AbortError') {
-        setError('Sin conexión para clima');
-        return;
-      }
-      setError('Sin conexión para clima');
+      // ...
     }
   };
 
@@ -98,7 +95,7 @@ export default function WeatherWidget() {
           <div className="flex items-center gap-2">
             <p className="text-sm text-muted">{error}</p>
             <button
-              onClick={loadWeather}
+              onClick={() => { setError(null); setWeather(null); loadWeather(); }}
               className="text-xs px-2 py-1 rounded hover:bg-gray-200"
             >
               Reintentar
@@ -111,6 +108,11 @@ export default function WeatherWidget() {
             <span className="text-xs text-gray-500 ml-2">
               {weather ? `Max ${Math.round(weather.tmax)}° / Min ${Math.round(weather.tmin)}°` : ''}
             </span>
+            {weather?.source === 'backup' && (
+              <span className="block text-[10px] text-orange-500 font-normal">
+                ⚠️ Fuente alternativa
+              </span>
+            )}
           </p>
         )}
       </div>
