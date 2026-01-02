@@ -29,7 +29,8 @@ export default function Dashboard() {
     { name: 'Córdoba', lat: -31.4201, lon: -64.1888 },
     { name: 'Rosario', lat: -32.9442, lon: -60.6505 },
     { name: 'Mar del Plata', lat: -38.0055, lon: -57.5426 },
-    { name: 'Mendoza', lat: -32.8908, lon: -68.8272 }
+    { name: 'Mendoza', lat: -32.8908, lon: -68.8272 },
+    { name: 'Puerto Madryn', lat: -42.7692, lon: -65.0385 }
   ];
 
   return (
