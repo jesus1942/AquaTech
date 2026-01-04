@@ -195,12 +195,13 @@ export default function WeatherWidget() {
       {expanded && weather && !error && (
         <div className="mt-4 pt-4 border-t border-theme animate-fade-in-up">
           {/* Configuración de Ubicación (Integrada) */}
-          <div className="mb-4 p-3 bg-white/50 dark:bg-black/20 rounded-xl border border-theme/50" onClick={e => e.stopPropagation()}>
-            <h4 className="text-xs font-bold text-muted uppercase tracking-wider mb-2">Ubicación</h4>
-            <div className="space-y-2">
+          <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-theme/50" onClick={e => e.stopPropagation()}>
+            <h4 className="text-xs font-bold text-muted uppercase tracking-wider mb-3">Cambiar Ubicación</h4>
+            <div className="flex flex-col gap-3">
+              {/* Opción 1: Ciudad o GPS */}
               <div className="flex gap-2">
                 <select
-                  className="flex-1 p-2 rounded-lg text-sm bg-surface border-theme text-theme"
+                  className="flex-1 p-2.5 rounded-lg text-sm bg-surface border-theme text-theme min-w-0 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   onChange={(e) => {
                     const city = cities.find(c => c.name === e.target.value);
                     if (city) {
@@ -210,7 +211,7 @@ export default function WeatherWidget() {
                     }
                   }}
                 >
-                  <option value="">Seleccionar ciudad</option>
+                  <option value="">Seleccionar ciudad...</option>
                   {cities.map(c => (
                     <option key={c.name} value={c.name}>{c.name}</option>
                   ))}
@@ -235,33 +236,37 @@ export default function WeatherWidget() {
                       alert('Geolocalización no soportada');
                     }
                   }}
-                  className="px-3 py-2 bg-green-600 text-white rounded-lg text-xs whitespace-nowrap flex items-center gap-1 hover:bg-green-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 shrink-0 shadow-sm active:scale-95"
                   disabled={locLoading}
                   title="Usar mi ubicación actual"
                 >
                   {locLoading ? '...' : '📍 GPS'}
                 </button>
               </div>
+
+              {/* Opción 2: Coordenadas Manuales */}
               <div className="flex gap-2">
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={latInput}
-                  onChange={(e) => setLatInput(parseFloat(e.target.value))}
-                  className="flex-1 p-2 rounded-lg text-sm bg-surface border-theme text-theme"
-                  placeholder="Lat"
-                />
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={lonInput}
-                  onChange={(e) => setLonInput(parseFloat(e.target.value))}
-                  className="flex-1 p-2 rounded-lg text-sm bg-surface border-theme text-theme"
-                  placeholder="Lon"
-                />
+                <div className="grid grid-cols-2 gap-2 flex-1">
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={latInput}
+                    onChange={(e) => setLatInput(parseFloat(e.target.value))}
+                    className="w-full p-2.5 rounded-lg text-sm bg-surface border-theme text-theme min-w-0 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Latitud"
+                  />
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={lonInput}
+                    onChange={(e) => setLonInput(parseFloat(e.target.value))}
+                    className="w-full p-2.5 rounded-lg text-sm bg-surface border-theme text-theme min-w-0 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Longitud"
+                  />
+                </div>
                 <button
                   onClick={handleSaveLocation}
-                  className="px-3 py-2 btn-primary rounded-lg text-sm whitespace-nowrap"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-theme rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors shrink-0 shadow-sm active:scale-95"
                 >
                   Guardar
                 </button>
