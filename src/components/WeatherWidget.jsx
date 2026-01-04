@@ -10,6 +10,30 @@ export default function WeatherWidget() {
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
+  const [latInput, setLatInput] = useState(config?.weatherLocation?.lat ?? -34.6037);
+  const [lonInput, setLonInput] = useState(config?.weatherLocation?.lon ?? -58.3816);
+  const [locLoading, setLocLoading] = useState(false);
+
+  useEffect(() => {
+    if (config?.weatherLocation) {
+      setLatInput(config.weatherLocation.lat);
+      setLonInput(config.weatherLocation.lon);
+    }
+  }, [config?.weatherLocation]);
+
+  const cities = [
+    { name: 'Buenos Aires', lat: -34.6037, lon: -58.3816 },
+    { name: 'Córdoba', lat: -31.4201, lon: -64.1888 },
+    { name: 'Rosario', lat: -32.9442, lon: -60.6505 },
+    { name: 'Mar del Plata', lat: -38.0055, lon: -57.5426 },
+    { name: 'Mendoza', lat: -32.8908, lon: -68.8272 },
+    { name: 'Puerto Madryn', lat: -42.7692, lon: -65.0385 }
+  ];
+
+  const handleSaveLocation = (e) => {
+    e.stopPropagation(); // Evitar colapsar la tarjeta al guardar
+    setConfig({ ...config, weatherLocation: { lat: latInput, lon: lonInput } });
+  };
 
   const loadWeather = async () => {
     try {
@@ -170,6 +194,81 @@ export default function WeatherWidget() {
 
       {expanded && weather && !error && (
         <div className="mt-4 pt-4 border-t border-theme animate-fade-in-up">
+          {/* Configuración de Ubicación (Integrada) */}
+          <div className="mb-4 p-3 bg-white/50 dark:bg-black/20 rounded-xl border border-theme/50" onClick={e => e.stopPropagation()}>
+            <h4 className="text-xs font-bold text-muted uppercase tracking-wider mb-2">Ubicación</h4>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <select
+                  className="flex-1 p-2 rounded-lg text-sm bg-surface border-theme text-theme"
+                  onChange={(e) => {
+                    const city = cities.find(c => c.name === e.target.value);
+                    if (city) {
+                      setLatInput(city.lat);
+                      setLonInput(city.lon);
+                      setConfig({ ...config, weatherLocation: { lat: city.lat, lon: city.lon } });
+                    }
+                  }}
+                >
+                  <option value="">Seleccionar ciudad</option>
+                  {cities.map(c => (
+                    <option key={c.name} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => {
+                    if ('geolocation' in navigator) {
+                      setLocLoading(true);
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const { latitude, longitude } = pos.coords;
+                          setConfig({ ...config, weatherLocation: { lat: latitude, lon: longitude } });
+                          setLocLoading(false);
+                        },
+                        (err) => {
+                          setLocLoading(false);
+                          alert('Error: ' + err.message);
+                        },
+                        { timeout: 10000, enableHighAccuracy: true }
+                      );
+                    } else {
+                      alert('Geolocalización no soportada');
+                    }
+                  }}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg text-xs whitespace-nowrap flex items-center gap-1 hover:bg-green-700 transition-colors"
+                  disabled={locLoading}
+                  title="Usar mi ubicación actual"
+                >
+                  {locLoading ? '...' : '📍 GPS'}
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={latInput}
+                  onChange={(e) => setLatInput(parseFloat(e.target.value))}
+                  className="flex-1 p-2 rounded-lg text-sm bg-surface border-theme text-theme"
+                  placeholder="Lat"
+                />
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={lonInput}
+                  onChange={(e) => setLonInput(parseFloat(e.target.value))}
+                  className="flex-1 p-2 rounded-lg text-sm bg-surface border-theme text-theme"
+                  placeholder="Lon"
+                />
+                <button
+                  onClick={handleSaveLocation}
+                  className="px-3 py-2 btn-primary rounded-lg text-sm whitespace-nowrap"
+                >
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Detalles Grid */}
           <div className="grid grid-cols-4 gap-2 mb-4">
             <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
