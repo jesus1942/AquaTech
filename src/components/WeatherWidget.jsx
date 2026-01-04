@@ -105,7 +105,8 @@ export default function WeatherWidget() {
         }
       }
     } catch (e) {
-      // ...
+      console.error('Error general en WeatherWidget', e);
+      setError('Error inesperado en el widget de clima.');
     }
   };
 
