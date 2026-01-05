@@ -23,9 +23,10 @@ function AppShell() {
         tipo: 'Mantenimiento Químico',
         notas: resultado.acciones.join('. '),
         valores: resultado.valores,
-        clienteId: resultado.clienteId
+        clienteId: resultado.clienteId,
+        photos: resultado.photos || []
     });
-    alert('Medición guardada en el historial del cliente');
+    alert('Medición y fotos guardadas en el historial del cliente');
   };
 
   const handleSelectClienteDesdeAgenda = (cliente) => {

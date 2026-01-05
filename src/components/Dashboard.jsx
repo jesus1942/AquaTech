@@ -39,9 +39,9 @@ export default function Dashboard() {
             {Math.round(ingresosHoy).toLocaleString()} <span className="text-xs font-normal text-muted">{moneda}</span>
           </p>
         </div>
-        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800">
-          <p className="text-xs text-blue-600 dark:text-blue-300 uppercase tracking-wider mb-1">Agua (Mes)</p>
-          <p className="text-xl font-bold text-blue-700 dark:text-blue-200">
+        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center bg-cyan-50 dark:bg-cyan-900/20 border-cyan-100 dark:border-cyan-800">
+          <p className="text-xs text-cyan-700 dark:text-cyan-300 uppercase tracking-wider mb-1">Agua Tratada (Mes)</p>
+          <p className="text-xl font-bold text-cyan-800 dark:text-cyan-200">
             {aguaDisplay}
           </p>
         </div>
