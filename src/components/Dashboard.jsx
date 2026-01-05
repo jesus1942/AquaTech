@@ -4,111 +4,82 @@ import WeatherWidget from './WeatherWidget.jsx';
 import CalendarModal from './CalendarModal.jsx';
 
 export default function Dashboard() {
-  const { clientes, getCitasHoy, getIngresosEstimados, config, setConfig, tarifario, setTarifario } = useAppStore();
+  const { clientes, getCitasHoy, getIngresosEstimados, config, getAguaMovidaMensual } = useAppStore();
   const citasHoy = getCitasHoy();
   const ingresosHoy = getIngresosEstimados(
     new Date(new Date().setHours(0,0,0,0)),
     new Date(new Date().setHours(23,59,59,999))
   );
+  const aguaMovida = getAguaMovidaMensual();
   const moneda = config?.moneda || 'ARS';
   const [showCal, setShowCal] = useState(false);
-  const [latInput, setLatInput] = useState(config?.weatherLocation?.lat ?? -34.6037);
-  const [lonInput, setLonInput] = useState(config?.weatherLocation?.lon ?? -58.3816);
-  const [locLoading, setLocLoading] = useState(false);
 
-  // Sincronizar inputs cuando cambia la config (ej. al usar geolocalización)
-  React.useEffect(() => {
-    if (config?.weatherLocation) {
-      setLatInput(config.weatherLocation.lat);
-      setLonInput(config.weatherLocation.lon);
-    }
-  }, [config?.weatherLocation]);
-
-  const cities = [
-    { name: 'Buenos Aires', lat: -34.6037, lon: -58.3816 },
-    { name: 'Córdoba', lat: -31.4201, lon: -64.1888 },
-    { name: 'Rosario', lat: -32.9442, lon: -60.6505 },
-    { name: 'Mar del Plata', lat: -38.0055, lon: -57.5426 },
-    { name: 'Mendoza', lat: -32.8908, lon: -68.8272 },
-    { name: 'Puerto Madryn', lat: -42.7692, lon: -65.0385 }
-  ];
+  // Formatear litros a m³ si es muy grande
+  const aguaDisplay = aguaMovida >= 1000 
+    ? `${(aguaMovida / 1000).toLocaleString()} m³` 
+    : `${aguaMovida.toLocaleString()} L`;
 
   return (
     <div className="space-y-6">
       {showCal && <CalendarModal onClose={() => setShowCal(false)} />}
       
       {/* 1. Resumen (Stats) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="card rounded-2xl p-4 shadow-sm">
-          <p className="text-xs text-muted">Citas Hoy</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center">
+          <p className="text-xs text-muted uppercase tracking-wider mb-1">Citas Hoy</p>
           <p className="text-2xl font-bold text-theme">{citasHoy.length}</p>
         </div>
-        <div className="card rounded-2xl p-4 shadow-sm">
-          <p className="text-xs text-muted">Clientes</p>
+        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center">
+          <p className="text-xs text-muted uppercase tracking-wider mb-1">Clientes</p>
           <p className="text-2xl font-bold text-theme">{clientes.length}</p>
         </div>
-        <div className="card rounded-2xl p-4 shadow-sm">
-          <p className="text-xs text-muted">Ingresos Hoy</p>
-          <p className="text-2xl font-bold text-theme">
-            {moneda} {Math.round(ingresosHoy).toLocaleString()}
+        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center">
+          <p className="text-xs text-muted uppercase tracking-wider mb-1">Ingresos</p>
+          <p className="text-xl font-bold text-green-600 dark:text-green-400">
+            {Math.round(ingresosHoy).toLocaleString()} <span className="text-xs font-normal text-muted">{moneda}</span>
+          </p>
+        </div>
+        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800">
+          <p className="text-xs text-blue-600 dark:text-blue-300 uppercase tracking-wider mb-1">Agua (Mes)</p>
+          <p className="text-xl font-bold text-blue-700 dark:text-blue-200">
+            {aguaDisplay}
           </p>
         </div>
       </div>
 
       {/* 2. Próximas Citas */}
-      <div className="card rounded-2xl p-4 shadow-sm">
-        <h3 className="text-sm font-bold text-theme mb-3">Próximas Citas</h3>
-        <div className="flex justify-end mb-2">
-          <button
-            onClick={() => setShowCal(true)}
-            className="px-3 py-2 btn-primary rounded-lg text-xs"
-          >
-            Ver Calendario
-          </button>
+      <div className="card rounded-2xl p-5 shadow-sm border border-theme">
+        <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-bold text-theme uppercase tracking-wider">Próximas Citas</h3>
+            <button
+                onClick={() => setShowCal(true)}
+                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-theme rounded-lg text-xs font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+                Ver Calendario
+            </button>
         </div>
         <ul className="space-y-3">
           {citasHoy.slice(0,3).map(c => (
-            <li key={c.id} className="flex justify-between items-center">
-              <span className="text-theme text-sm">
-                {new Date(c.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-              </span>
-              <span className="text-muted text-xs">{c.tipo}</span>
+            <li key={c.id} className="flex justify-between items-center p-3 bg-surface rounded-xl border border-theme/50">
+              <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-8 rounded-full bg-blue-500"></div>
+                  <span className="text-theme text-sm font-medium">
+                    {new Date(c.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} hs
+                  </span>
+              </div>
+              <span className="text-muted text-xs font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-lg">{c.tipo}</span>
             </li>
           ))}
           {citasHoy.length === 0 && (
-            <p className="text-muted text-sm">No hay citas para hoy.</p>
+            <div className="text-center py-6">
+                <p className="text-muted text-sm">No hay citas para hoy.</p>
+            </div>
           )}
         </ul>
       </div>
 
       {/* 3. Clima */}
       <WeatherWidget />
-
-      {/* 4. Configuración (Tarifario) */}
-      <div className="card rounded-2xl p-4 shadow-sm">
-        <h3 className="text-sm font-bold text-theme mb-3">Tarifario</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {tarifario.map((t, idx) => (
-            <div key={t.tarea} className="flex items-center justify-between gap-2">
-              <span className="text-sm text-theme">{t.tarea}</span>
-              <input
-                type="number"
-                className="w-24 p-2 rounded-lg text-right"
-                value={t.precioBase}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value) || 0;
-                  const next = [...tarifario];
-                  next[idx] = { ...next[idx], precioBase: val };
-                  setTarifario(next);
-                }}
-              />
-            </div>
-          ))}
-        </div>
-        <p className="text-xs text-muted mt-2">
-          Precios estimados para nuevas citas.
-        </p>
-      </div>
     </div>
   );
 }

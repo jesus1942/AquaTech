@@ -131,6 +131,29 @@ export function AppProvider({ children }) {
     return citas.reduce((sum, v) => sum + (v.precioEstimado || 0), 0);
   };
 
+  const getAguaMovidaMensual = () => {
+    const hoy = new Date();
+    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0, 23, 59, 59);
+
+    // Filtrar visitas del mes actual que sean de tipo "Mantenimiento" o similar
+    const visitasMes = visitas.filter(v => {
+      const f = new Date(v.fecha);
+      return f >= inicioMes && f <= finMes && 
+             ['Mantenimiento', 'Mantenimiento Químico'].includes(v.tipo);
+    });
+
+    // Sumar el volumen de la piscina de cada cliente visitado
+    // Si un cliente fue visitado 4 veces, sumamos su volumen 4 veces (asumiendo que se "mueve" el agua en cada visita)
+    const totalLitros = visitasMes.reduce((acc, v) => {
+      const cliente = clientes.find(c => c.id === v.clienteId);
+      const vol = cliente ? (parseFloat(cliente.volumenPiscina) || 0) : 0;
+      return acc + vol;
+    }, 0);
+
+    return totalLitros;
+  };
+
   const value = {
     clientes,
     agregarCliente,
@@ -144,7 +167,8 @@ export function AppProvider({ children }) {
     setConfig,
     getTarifaPorTarea,
     getCitasHoy,
-    getIngresosEstimados
+    getIngresosEstimados,
+    getAguaMovidaMensual
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
