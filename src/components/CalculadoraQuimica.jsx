@@ -99,81 +99,113 @@ export default function CalculadoraQuimica({ cliente, onGuardarMedicion }) {
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4 shadow-sm">
-      <h4 className="font-bold text-gray-700 mb-2 border-b pb-2">Calculadora Química</h4>
-      <p className="text-xs text-gray-500 mb-3">
-        Volumen: <span className="font-semibold">{parseInt(cliente.volumenPiscina).toLocaleString()} L</span> ({cliente.tipoPiscina})
-      </p>
+    <div className="card p-5 rounded-2xl shadow-sm mt-4 border border-theme">
+      <div className="flex items-center justify-between mb-4 border-b border-theme pb-2">
+        <h4 className="font-bold text-theme text-lg">Calculadora Química</h4>
+        <div className="text-right">
+             <span className="text-xs text-muted block">Volumen</span>
+             <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{parseInt(cliente.volumenPiscina).toLocaleString()} L</span>
+        </div>
+      </div>
       
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">pH</label>
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="space-y-1">
+            <label className="block text-xs font-bold text-muted uppercase tracking-wider text-center">pH</label>
             <input 
                 type="number" step="0.1" 
-                className="w-full p-2 border rounded text-center text-base focus:ring-2 focus:ring-blue-500 outline-none" 
+                className="w-full p-3 border border-theme rounded-xl text-center text-lg font-bold bg-surface text-theme focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
                 value={medicion.ph}
                 onChange={e => setMedicion({...medicion, ph: e.target.value})}
                 placeholder="7.2"
             />
         </div>
-        <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Cloro (ppm)</label>
+        <div className="space-y-1">
+            <label className="block text-xs font-bold text-muted uppercase tracking-wider text-center">Cloro</label>
             <input 
                 type="number" step="0.1" 
-                className="w-full p-2 border rounded text-center text-base focus:ring-2 focus:ring-blue-500 outline-none" 
+                className="w-full p-3 border border-theme rounded-xl text-center text-lg font-bold bg-surface text-theme focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
                 value={medicion.cloro}
                 onChange={e => setMedicion({...medicion, cloro: e.target.value})}
                 placeholder="1.5"
             />
         </div>
-        <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Alcalinidad</label>
+        <div className="space-y-1">
+            <label className="block text-xs font-bold text-muted uppercase tracking-wider text-center">Alcalinidad</label>
             <input 
                 type="number" 
-                className="w-full p-2 border rounded text-center text-base focus:ring-2 focus:ring-blue-500 outline-none" 
+                className="w-full p-3 border border-theme rounded-xl text-center text-lg font-bold bg-surface text-theme focus:ring-2 focus:ring-blue-500 outline-none shadow-sm" 
                 value={medicion.alcalinidad}
                 onChange={e => setMedicion({...medicion, alcalinidad: e.target.value})}
-                placeholder="Opcional"
+                placeholder="-"
             />
         </div>
       </div>
 
-      <div className="mt-2">
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">Fotos (opcional)</label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={async (e) => {
-            const files = Array.from(e.target.files || []);
-            const reads = await Promise.all(files.map(file => new Promise((resolve) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result);
-              reader.readAsDataURL(file);
-            })));
-            setPhotos(reads);
-          }}
-          className="mt-1 text-sm"
-        />
+      <div className="mb-6">
+        <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Evidencia Fotográfica</label>
+        <div className="flex gap-2 overflow-x-auto pb-2">
+            {/* Botón de carga estilizado */}
+            <label className="flex-shrink-0 w-20 h-20 bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <svg className="w-6 h-6 text-muted mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-[10px] text-muted font-medium">Cámara</span>
+                <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={async (e) => {
+                        const files = Array.from(e.target.files || []);
+                        const reads = await Promise.all(files.map(file => new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(file);
+                        })));
+                        setPhotos([...photos, ...reads]);
+                    }}
+                />
+            </label>
+
+            {/* Previsualización de fotos */}
+            {photos.map((src, idx) => (
+                <div key={idx} className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-theme group">
+                    <img src={src} alt="preview" className="w-full h-full object-cover" />
+                    <button 
+                        onClick={() => setPhotos(photos.filter((_, i) => i !== idx))}
+                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+            ))}
+        </div>
       </div>
 
       <div className="flex gap-2">
           <button 
             onClick={calcular}
-            className="flex-1 bg-indigo-600 text-white py-2 rounded text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+            className="flex-1 btn-primary py-3 rounded-xl text-sm font-bold shadow-lg active:scale-95 transition-all"
           >
             Calcular Dosis
           </button>
       </div>
 
       {recomendacion && (
-        <div className="mt-4 animate-fade-in">
-            <div className="p-3 bg-white border border-indigo-100 rounded-lg shadow-sm">
-                <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Diagnóstico y Receta:</h5>
-                <ul className="space-y-2">
+        <div className="mt-6 animate-fade-in-up">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                    <div className="bg-blue-100 dark:bg-blue-800 p-1.5 rounded-lg">
+                        <svg className="w-4 h-4 text-blue-600 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    </div>
+                    <h5 className="font-bold text-blue-900 dark:text-blue-100">Diagnóstico y Receta</h5>
+                </div>
+                <ul className="space-y-3">
                     {recomendacion.acciones.map((acc, i) => (
-                        <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
-                            <span>{acc}</span>
+                        <li key={i} className="text-sm text-theme flex items-start gap-2">
+                            <span className="mt-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0" />
+                            <span className="leading-snug">{acc}</span>
                         </li>
                     ))}
                 </ul>
@@ -181,8 +213,9 @@ export default function CalculadoraQuimica({ cliente, onGuardarMedicion }) {
             
             <button
                 onClick={() => onGuardarMedicion(recomendacion)}
-                className="w-full mt-3 bg-green-600 text-white py-2 rounded text-sm font-medium hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"
+                className="w-full mt-4 bg-green-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-green-700 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2"
             >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
                 Guardar en Historial
             </button>
         </div>
