@@ -29,13 +29,13 @@ export default function ClienteForm({ onCancel, onSuccess }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow mb-4">
-      <h3 className="text-lg font-bold mb-4">Nuevo Cliente</h3>
+    <div className="card p-4 rounded-lg shadow mb-4">
+      <h3 className="text-lg font-bold text-theme mb-4">Nuevo Cliente</h3>
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="text"
           placeholder="Nombre completo"
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border border-theme rounded bg-surface text-theme placeholder-gray-400"
           value={formData.nombre}
           onChange={e => setFormData({...formData, nombre: e.target.value})}
           required
@@ -43,14 +43,14 @@ export default function ClienteForm({ onCancel, onSuccess }) {
         <input
           type="tel"
           placeholder="Teléfono (549...)"
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border border-theme rounded bg-surface text-theme placeholder-gray-400"
           value={formData.telefono}
           onChange={e => setFormData({...formData, telefono: e.target.value})}
         />
         <input
           type="text"
           placeholder="Dirección"
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border border-theme rounded bg-surface text-theme placeholder-gray-400"
           value={formData.direccion}
           onChange={e => setFormData({...formData, direccion: e.target.value})}
         />
@@ -58,12 +58,12 @@ export default function ClienteForm({ onCancel, onSuccess }) {
             <input
             type="number"
             placeholder="Volumen (Litros)"
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-theme rounded bg-surface text-theme placeholder-gray-400"
             value={formData.volumenPiscina}
             onChange={e => setFormData({...formData, volumenPiscina: e.target.value})}
             />
             <select 
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border border-theme rounded bg-surface text-theme"
                 value={formData.tipoPiscina}
                 onChange={e => setFormData({...formData, tipoPiscina: e.target.value})}
             >
@@ -75,11 +75,11 @@ export default function ClienteForm({ onCancel, onSuccess }) {
         </div>
         
         <div className="flex gap-2 pt-2">
-            <button type="submit" className="flex-1 bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+            <button type="submit" className="flex-1 btn-primary p-2 rounded hover:opacity-90 transition-opacity">
             Guardar Cliente
             </button>
             {onCancel && (
-                <button type="button" onClick={onCancel} className="px-4 py-2 border rounded text-gray-600">
+                <button type="button" onClick={onCancel} className="px-4 py-2 border border-theme rounded text-muted hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 Cancelar
                 </button>
             )}

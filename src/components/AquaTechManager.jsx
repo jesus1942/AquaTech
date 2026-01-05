@@ -43,9 +43,9 @@ function AppShell() {
         return (
             <div className="space-y-6 pb-20">
                 {/* Detalle del Cliente */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                    <h2 className="text-2xl font-bold text-gray-800">{clienteSeleccionado.nombre}</h2>
-                    <p className="text-gray-500">{clienteSeleccionado.direccion}</p>
+                <div className="card p-4 rounded-xl shadow-sm">
+                    <h2 className="text-2xl font-bold text-theme">{clienteSeleccionado.nombre}</h2>
+                    <p className="text-muted">{clienteSeleccionado.direccion}</p>
                     <div className="mt-2 flex gap-2">
                         <a 
                             href={`https://wa.me/${clienteSeleccionado.telefono}`} 
@@ -57,15 +57,15 @@ function AppShell() {
                         </a>
                         <a 
                             href={`tel:${clienteSeleccionado.telefono}`}
-                            className="flex-1 bg-gray-100 text-gray-700 text-center py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                            className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-center py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                         >
                             Llamar
                         </a>
                     </div>
                     <div className="mt-4">
-                      <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider ml-1">Notas</label>
+                      <label className="block text-xs font-semibold text-muted uppercase tracking-wider ml-1">Notas</label>
                       <textarea
-                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg bg-white text-gray-900"
+                        className="w-full mt-1 p-3 border border-theme rounded-lg bg-surface text-theme placeholder-gray-400"
                         rows={3}
                         value={clienteSeleccionado.notas || ''}
                         onChange={(e) => {
@@ -86,21 +86,21 @@ function AppShell() {
 
                 {/* Historial */}
                 <div>
-                    <h3 className="text-lg font-bold text-gray-700 mb-3">Historial de Visitas</h3>
+                    <h3 className="text-lg font-bold text-theme mb-3">Historial de Visitas</h3>
                     <div className="space-y-3">
-                        {historial.length === 0 && <p className="text-gray-400 text-sm">Sin visitas registradas.</p>}
+                        {historial.length === 0 && <p className="text-muted text-sm">Sin visitas registradas.</p>}
                         {historial.map(visita => (
-                            <div key={visita.id} className="bg-white p-3 rounded-lg shadow-sm border-l-4 border-indigo-400">
-                                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                            <div key={visita.id} className="card p-3 rounded-lg shadow-sm border-l-4 border-indigo-400">
+                                <div className="flex justify-between text-xs text-muted mb-1">
                                     <span>{new Date(visita.fecha).toLocaleDateString()}</span>
                                     <span>{new Date(visita.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                 </div>
-                                <p className="font-medium text-gray-800">{visita.tipo}</p>
-                                <p className="text-sm text-gray-600 mt-1">{visita.notas}</p>
+                                <p className="font-medium text-theme">{visita.tipo}</p>
+                                <p className="text-sm text-muted mt-1">{visita.notas}</p>
                                 {visita.valores && (
                                     <div className="mt-2 flex gap-2 text-xs">
-                                        {visita.valores.ph && <span className="bg-gray-100 px-2 py-1 rounded">pH: {visita.valores.ph}</span>}
-                                        {visita.valores.cloro && <span className="bg-gray-100 px-2 py-1 rounded">Cl: {visita.valores.cloro}</span>}
+                                        {visita.valores.ph && <span className="bg-gray-100 dark:bg-gray-700 text-theme px-2 py-1 rounded">pH: {visita.valores.ph}</span>}
+                                        {visita.valores.cloro && <span className="bg-gray-100 dark:bg-gray-700 text-theme px-2 py-1 rounded">Cl: {visita.valores.cloro}</span>}
                                     </div>
                                 )}
                                 {visita.photos && visita.photos.length > 0 && (
