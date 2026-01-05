@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { analyzeWaterQuality } from '../utils/waterAnalyzer';
 
 export default function CalculadoraQuimica({ cliente, onGuardarMedicion }) {
   const [medicion, setMedicion] = useState({
@@ -9,94 +10,7 @@ export default function CalculadoraQuimica({ cliente, onGuardarMedicion }) {
   
   const [recomendacion, setRecomendacion] = useState(null);
   const [photos, setPhotos] = useState([]);
-
-  const calcular = () => {
-    const vol = parseFloat(cliente.volumenPiscina) || 0;
-    if (vol === 0) {
-        alert("El cliente no tiene volumen de piscina registrado.");
-        return;
-    }
-
-    const ph = parseFloat(medicion.ph);
-    const cloro = parseFloat(medicion.cloro);
-    const alc = medicion.alcalinidad ? parseFloat(medicion.alcalinidad) : null;
-    
-    let recs = [];
-
-    // 1. Corrección de Alcalinidad (Prioridad Alta)
-    // Rango ideal: 80 - 120 ppm
-    if (alc !== null) {
-        if (alc < 80) {
-            // Subir Alcalinidad con Bicarbonato de Sodio
-            // Aprox 17g/m3 sube 10ppm
-            const falta = 100 - alc; // Apuntar a 100 ppm
-            const gramosBicarbonato = (falta * 1.7 * (vol / 1000)).toFixed(0);
-            recs.push(`Alcalinidad Baja (${alc} ppm). Agregar ${gramosBicarbonato}g de Bicarbonato de Sodio. (Esperar 2hs antes de corregir pH).`);
-        } else if (alc > 140) {
-            // Bajar Alcalinidad con Ácido
-            // Es complejo, pero aprox 20ml/m3 baja 10ppm (varía mucho)
-            recs.push(`Alcalinidad Alta (${alc} ppm). Agregar ácido lentamente y airear el agua.`);
-        } else {
-            recs.push(`Alcalinidad Correcta (${alc} ppm).`);
-        }
-    } else {
-        recs.push(`Sin dato de Alcalinidad. La corrección de pH podría ser imprecisa.`);
-    }
-
-    // 2. Corrección de pH
-    // pH ideal: 7.2 - 7.6
-    if (!isNaN(ph)) {
-        if (ph < 7.2) {
-            // Subir pH (Carbonato de Sodio - Soda Solvay)
-            const diferencia = 7.2 - ph;
-            // Si la alcalinidad es baja, se necesita menos. Si es alta, más.
-            // Usamos factor estándar si no hay dato.
-            const gramos = (diferencia * 10 * 10 * (vol / 1000)).toFixed(0); 
-            recs.push(`pH Bajo (${ph}). Agregar ${gramos}g de Elevador de pH (Soda Solvay).`);
-        } else if (ph > 7.6) {
-            // Bajar pH (Ácido Clorhídrico/Muriático)
-            const diferencia = ph - 7.6;
-            const ml = (diferencia * 10 * 10 * (vol / 1000)).toFixed(0);
-            recs.push(`pH Alto (${ph}). Agregar ${ml}cc de Reductor de pH (Ácido).`);
-        } else {
-            recs.push(`pH Correcto (${ph}).`);
-        }
-    }
-
-    // 3. Corrección de Cloro
-    // Cloro ideal: 1.0 - 3.0 ppm
-    if (!isNaN(cloro)) {
-        if (cloro < 1.0) {
-            // Subir Cloro (Cloro granulado 60% aprox 2g/m3 sube 1ppm)
-            const falta = 1.5 - cloro; // Apuntar a 1.5
-            const gramos = (falta * 2 * (vol / 1000)).toFixed(0);
-            recs.push(`Cloro Bajo (${cloro}). Agregar ${gramos}g de Cloro Granulado.`);
-        } else if (cloro > 3.0) {
-            recs.push(`Cloro Alto (${cloro}). No agregar cloro por hoy.`);
-        } else {
-            recs.push(`Cloro Correcto (${cloro}).`);
-        }
-    }
-
-    if (recs.length === 0) {
-        recs.push("Ingresa valores para calcular.");
-    }
-
-    const resultado = {
-        fecha: new Date().toISOString(),
-        valores: { ...medicion },
-        acciones: recs,
-        clienteId: cliente.id,
-        photos
-    };
-
-    setRecomendacion(resultado);
-    if (onGuardarMedicion) {
-        // Pasamos el resultado pero NO guardamos automáticamente, dejamos que el usuario decida con el botón "Guardar Visita" en el componente padre, o agregamos un botón aquí.
-        // En la implementación actual de App.jsx, onGuardarMedicion guarda directo.
-        // Vamos a devolver el resultado para que el padre lo maneje.
-    }
-  };
+  const [verificacion, setVerificacion] = useState({ status: 'pending', message: '', loading: false });
 
   const compressImage = (file) => {
     return new Promise((resolve) => {
@@ -132,6 +46,100 @@ export default function CalculadoraQuimica({ cliente, onGuardarMedicion }) {
         };
       };
     });
+  };
+
+  const handleVerifyPhoto = async (file) => {
+      setVerificacion({ status: 'analyzing', message: 'Analizando calidad del agua...', loading: true });
+      try {
+          const result = await analyzeWaterQuality(file);
+          if (result.isClean) {
+              setVerificacion({ 
+                  status: 'verified', 
+                  message: `✅ ${result.message} (Score: ${result.score})`, 
+                  loading: false 
+              });
+          } else {
+              setVerificacion({ 
+                  status: 'failed', 
+                  message: `⚠️ ${result.message}`, 
+                  loading: false 
+              });
+          }
+      } catch (e) {
+          setVerificacion({ status: 'error', message: 'Error al analizar imagen', loading: false });
+      }
+  };
+
+  const calcular = () => {
+    const vol = parseFloat(cliente.volumenPiscina) || 0;
+    if (vol === 0) {
+        alert("El cliente no tiene volumen de piscina registrado.");
+        return;
+    }
+
+    const ph = parseFloat(medicion.ph);
+    const cloro = parseFloat(medicion.cloro);
+    const alc = medicion.alcalinidad ? parseFloat(medicion.alcalinidad) : null;
+    
+    let recs = [];
+
+    // 1. Corrección de Alcalinidad (Prioridad Alta)
+    if (alc !== null) {
+        if (alc < 80) {
+            const falta = 100 - alc; 
+            const gramosBicarbonato = (falta * 1.7 * (vol / 1000)).toFixed(0);
+            recs.push(`Alcalinidad Baja (${alc} ppm). Agregar ${gramosBicarbonato}g de Bicarbonato de Sodio. (Esperar 2hs antes de corregir pH).`);
+        } else if (alc > 140) {
+            recs.push(`Alcalinidad Alta (${alc} ppm). Agregar ácido lentamente y airear el agua.`);
+        } else {
+            recs.push(`Alcalinidad Correcta (${alc} ppm).`);
+        }
+    } else {
+        recs.push(`Sin dato de Alcalinidad. La corrección de pH podría ser imprecisa.`);
+    }
+
+    // 2. Corrección de pH
+    if (!isNaN(ph)) {
+        if (ph < 7.2) {
+            const diferencia = 7.2 - ph;
+            const gramos = (diferencia * 10 * 10 * (vol / 1000)).toFixed(0); 
+            recs.push(`pH Bajo (${ph}). Agregar ${gramos}g de Elevador de pH (Soda Solvay).`);
+        } else if (ph > 7.6) {
+            const diferencia = ph - 7.6;
+            const ml = (diferencia * 10 * 10 * (vol / 1000)).toFixed(0);
+            recs.push(`pH Alto (${ph}). Agregar ${ml}cc de Reductor de pH (Ácido).`);
+        } else {
+            recs.push(`pH Correcto (${ph}).`);
+        }
+    }
+
+    // 3. Corrección de Cloro
+    if (!isNaN(cloro)) {
+        if (cloro < 1.0) {
+            const falta = 1.5 - cloro; 
+            const gramos = (falta * 2 * (vol / 1000)).toFixed(0);
+            recs.push(`Cloro Bajo (${cloro}). Agregar ${gramos}g de Cloro Granulado.`);
+        } else if (cloro > 3.0) {
+            recs.push(`Cloro Alto (${cloro}). No agregar cloro por hoy.`);
+        } else {
+            recs.push(`Cloro Correcto (${cloro}).`);
+        }
+    }
+
+    if (recs.length === 0) {
+        recs.push("Ingresa valores para calcular.");
+    }
+
+    const resultado = {
+        fecha: new Date().toISOString(),
+        valores: { ...medicion },
+        acciones: recs,
+        clienteId: cliente.id,
+        photos,
+        verificada: verificacion.status === 'verified' // Flag importante
+    };
+
+    setRecomendacion(resultado);
   };
 
   return (
@@ -178,30 +186,58 @@ export default function CalculadoraQuimica({ cliente, onGuardarMedicion }) {
       </div>
 
       <div className="mb-6">
-        <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Evidencia Fotográfica</label>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {/* Botón de carga estilizado */}
-            <label className="flex-shrink-0 w-24 h-24 bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group">
-                <div className="bg-white dark:bg-gray-700 p-2 rounded-full mb-1 shadow-sm group-hover:scale-110 transition-transform">
-                    <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                </div>
-                <span className="text-[10px] text-muted font-bold uppercase tracking-wide">Agregar</span>
+        <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Evidencia y Verificación</label>
+        
+        {/* Sección de Validación */}
+        <div className={`mb-3 p-3 rounded-xl border ${
+            verificacion.status === 'verified' ? 'bg-green-50 border-green-200' : 
+            verificacion.status === 'failed' ? 'bg-orange-50 border-orange-200' :
+            'bg-gray-50 border-theme'
+        }`}>
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-theme">Verificar Limpieza</span>
+                {verificacion.loading && <span className="text-xs text-blue-500 animate-pulse">Analizando...</span>}
+            </div>
+            
+            <p className="text-xs text-muted mb-3">
+                Sube una foto clara del agua para validar que está cristalina y contabilizar los litros tratados.
+            </p>
+
+            <label className="w-full flex items-center justify-center gap-2 py-3 bg-white dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span className="text-sm font-medium text-theme">Tomar Foto de Validación</span>
                 <input
                     type="file"
                     accept="image/*"
-                    multiple
                     className="hidden"
                     onChange={async (e) => {
-                        const files = Array.from(e.target.files || []);
-                        const compressedFiles = await Promise.all(files.map(compressImage));
-                        setPhotos([...photos, ...compressedFiles]);
+                        const file = e.target.files[0];
+                        if (file) {
+                            const compressed = await compressImage(file);
+                            // Convertir dataURL a File para el analizador si fuera necesario, 
+                            // pero analyzeWaterQuality acepta File o Blob. 
+                            // compressImage devuelve dataURL.
+                            // Para simplificar, analizamos el File original, pero guardamos el comprimido.
+                            
+                            handleVerifyPhoto(file); 
+                            setPhotos(prev => [...prev, compressed]);
+                        }
                     }}
                 />
             </label>
 
+            {verificacion.message && (
+                <div className={`mt-3 text-xs font-bold p-2 rounded-lg ${
+                    verificacion.status === 'verified' ? 'bg-green-100 text-green-700' : 
+                    verificacion.status === 'failed' ? 'bg-orange-100 text-orange-700' :
+                    'bg-gray-100 text-gray-600'
+                }`}>
+                    {verificacion.message}
+                </div>
+            )}
+        </div>
+
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {/* Previsualización de fotos */}
             {photos.map((src, idx) => (
                 <div key={idx} className="relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border border-theme shadow-sm group">

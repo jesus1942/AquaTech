@@ -142,8 +142,10 @@ export function AppProvider({ children }) {
     // Filtrar visitas del mes actual que sean de tipo "Mantenimiento" o similar
     const visitasMes = visitas.filter(v => {
       const f = new Date(v.fecha);
+      // AHORA: Solo cuenta si está verificada (v.verificada === true)
       return f >= inicioMes && f <= finMes && 
-             ['Mantenimiento', 'Mantenimiento Químico'].includes(v.tipo);
+             ['Mantenimiento', 'Mantenimiento Químico'].includes(v.tipo) &&
+             v.verificada === true;
     });
 
     // Sumar el volumen de la piscina de cada cliente visitado
