@@ -3,7 +3,7 @@ import { useAppStore } from '../hooks/useStore.jsx';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons.jsx';
 
 export default function CalendarModal({ onClose }) {
-  const { visitas, config } = useAppStore();
+  const { visitas, config, clientes } = useAppStore();
   const [current, setCurrent] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
