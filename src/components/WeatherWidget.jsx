@@ -31,31 +31,40 @@ export default function WeatherWidget() {
   };
 
   const loadWeather = async () => {
-    setLoading(true);
-    try {
-      // Prioridad: 1. Config guardada, 2. Default (BA)
-      // YA NO llamamos a geolocation automáticamente porque es lento.
-      let lat = config?.weatherLocation?.lat ?? -34.6037;
-      let lon = config?.weatherLocation?.lon ?? -58.3816;
+    // 1. Mostrar caché INMEDIATAMENTE si existe (Stale-While-Revalidate)
+    let lat = config?.weatherLocation?.lat ?? -34.6037;
+    let lon = config?.weatherLocation?.lon ?? -58.3816;
+    const cacheKey = `weatherCache:${lat},${lon}`;
+    const cached = localStorage.getItem(cacheKey);
+    let hasCache = false;
 
-      const cacheKey = `weatherCache:${lat},${lon}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
+    if (cached) {
+      try {
         const parsed = JSON.parse(cached);
-        if (Date.now() - parsed.ts < 60 * 60 * 1000) { // 1 hora de caché
-          setWeather(parsed.data);
-          setError(null);
-          setLoading(false);
+        setWeather(parsed.data); // Mostrar datos viejos ya
+        setLoading(false);       // Quitar skeleton ya
+        setError(null);
+        hasCache = true;
+        
+        // Si el caché es reciente (< 1 hora), no hacemos fetch
+        if (Date.now() - parsed.ts < 60 * 60 * 1000) {
           return;
         }
+      } catch (e) {
+        console.error("Cache corrupto", e);
       }
+    }
 
+    // 2. Si no hay caché, mostramos loading. Si hay caché, loading ya es false (silent update)
+    if (!hasCache) setLoading(true);
+
+    try {
       // Fetch extended data
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,is_day,weathercode,relative_humidity_2m,surface_pressure,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode,uv_index_max&timezone=auto`;
       const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms));
       
       try {
-        const res = await Promise.race([fetch(url), timeout(2500)]); // Timeout reducido a 2.5s
+        const res = await Promise.race([fetch(url), timeout(3000)]);
         if (!res.ok) throw new Error('API Error');
         const data = await res.json();
         
@@ -82,10 +91,12 @@ export default function WeatherWidget() {
         setError(null);
       } catch (err) {
         console.warn('Open-Meteo falló, probando wttr.in...', err);
+        // Si falla y teníamos caché, nos quedamos con el caché (silenciosamente)
+        if (hasCache) return;
         
         try {
           const timeoutFallback = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Fallback')), ms));
-          const res2 = await Promise.race([fetch(`https://wttr.in/${lat},${lon}?format=j1`), timeoutFallback(2500)]);
+          const res2 = await Promise.race([fetch(`https://wttr.in/${lat},${lon}?format=j1`), timeoutFallback(3000)]);
           
           if (!res2.ok) throw new Error('Fallback failed');
           const data2 = await res2.json();
@@ -114,12 +125,12 @@ export default function WeatherWidget() {
           setError(null);
         } catch (err2) {
           console.error('Ambos proveedores fallaron', err2);
-          setError('Sin conexión');
+          if (!hasCache) setError('Sin conexión');
         }
       }
     } catch (e) {
       console.error('Error general en WeatherWidget', e);
-      setError('Error inesperado');
+      if (!hasCache) setError('Error inesperado');
     } finally {
       setLoading(false);
     }
