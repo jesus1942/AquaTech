@@ -9,6 +9,7 @@ export default function WeatherWidget() {
   const { config, setConfig } = useAppStore();
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true); // Nuevo estado de carga
   const [expanded, setExpanded] = useState(false);
   const [showLocationSettings, setShowLocationSettings] = useState(false);
   const [latInput, setLatInput] = useState(config?.weatherLocation?.lat ?? -34.6037);
@@ -22,51 +23,39 @@ export default function WeatherWidget() {
     }
   }, [config?.weatherLocation]);
 
-  const cities = [
-    { name: 'Buenos Aires', lat: -34.6037, lon: -58.3816 },
-    { name: 'Córdoba', lat: -31.4201, lon: -64.1888 },
-    { name: 'Rosario', lat: -32.9442, lon: -60.6505 },
-    { name: 'Mar del Plata', lat: -38.0055, lon: -57.5426 },
-    { name: 'Mendoza', lat: -32.8908, lon: -68.8272 },
-    { name: 'Puerto Madryn', lat: -42.7692, lon: -65.0385 }
-  ];
+  // ... cities array ...
 
   const handleSaveLocation = (e) => {
-    e.stopPropagation(); // Evitar colapsar la tarjeta al guardar
+    e.stopPropagation();
     setConfig({ ...config, weatherLocation: { lat: latInput, lon: lonInput } });
   };
 
   const loadWeather = async () => {
+    setLoading(true);
     try {
-      let lat = -34.6037, lon = -58.3816;
-      if (config?.weatherLocation?.lat && config?.weatherLocation?.lon) {
-        lat = config.weatherLocation.lat;
-        lon = config.weatherLocation.lon;
-      } else if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const { latitude, longitude } = pos.coords;
-            setConfig({ ...config, weatherLocation: { lat: latitude, lon: longitude } });
-          },
-          () => {}
-        );
-      }
+      // Prioridad: 1. Config guardada, 2. Default (BA)
+      // YA NO llamamos a geolocation automáticamente porque es lento.
+      let lat = config?.weatherLocation?.lat ?? -34.6037;
+      let lon = config?.weatherLocation?.lon ?? -58.3816;
+
       const cacheKey = `weatherCache:${lat},${lon}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Date.now() - parsed.ts < 30 * 60 * 1000) {
+        if (Date.now() - parsed.ts < 60 * 60 * 1000) { // 1 hora de caché
           setWeather(parsed.data);
           setError(null);
+          setLoading(false);
           return;
         }
       }
+
       // Fetch extended data
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,is_day,weathercode,relative_humidity_2m,surface_pressure,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode,uv_index_max&timezone=auto`;
       const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms));
       
       try {
-        const res = await Promise.race([fetch(url), timeout(5000)]);
+        const res = await Promise.race([fetch(url), timeout(2500)]); // Timeout reducido a 2.5s
         if (!res.ok) throw new Error('API Error');
         const data = await res.json();
         
@@ -95,9 +84,8 @@ export default function WeatherWidget() {
         console.warn('Open-Meteo falló, probando wttr.in...', err);
         
         try {
-          // Fallback a wttr.in (JSON) con timeout también
           const timeoutFallback = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Fallback')), ms));
-          const res2 = await Promise.race([fetch(`https://wttr.in/${lat},${lon}?format=j1`), timeoutFallback(5000)]);
+          const res2 = await Promise.race([fetch(`https://wttr.in/${lat},${lon}?format=j1`), timeoutFallback(2500)]);
           
           if (!res2.ok) throw new Error('Fallback failed');
           const data2 = await res2.json();
@@ -126,12 +114,14 @@ export default function WeatherWidget() {
           setError(null);
         } catch (err2) {
           console.error('Ambos proveedores fallaron', err2);
-          setError('No se pudo cargar el clima. Verifica tu conexión.');
+          setError('Sin conexión');
         }
       }
     } catch (e) {
       console.error('Error general en WeatherWidget', e);
-      setError('Error inesperado en el widget de clima.');
+      setError('Error inesperado');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,34 +149,48 @@ export default function WeatherWidget() {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div>{iconEl}</div>
-          <div>
-            <p className="text-sm text-muted">Clima Hoy</p>
-            {error && (
-              <div className="flex items-center gap-2">
-                <p className="text-sm text-muted">{error}</p>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setError(null); setWeather(null); loadWeather(); }}
-                  className="text-xs px-2 py-1 rounded hover:bg-gray-200"
-                >
-                  Reintentar
-                </button>
+          {loading ? (
+            // Skeleton Loader
+            <div className="flex items-center gap-4 animate-pulse">
+              <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+              <div>
+                <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+                <div className="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
-            )}
-            {!error && (
-              <p className="text-lg font-bold text-theme">
-                {weather ? `${Math.round(weather.temp)}°C` : '...'} 
-                <span className="text-xs text-gray-500 ml-2">
-                  {weather ? `Max ${Math.round(weather.tmax)}° / Min ${Math.round(weather.tmin)}°` : ''}
-                </span>
-                {weather?.source === 'backup' && (
-                  <span className="block text-[10px] text-orange-500 font-normal">
-                    ⚠️ Fuente alternativa
-                  </span>
+            </div>
+          ) : (
+            // Contenido Real
+            <>
+              <div>{iconEl}</div>
+              <div>
+                <p className="text-sm text-muted">Clima Hoy</p>
+                {error && (
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-muted">{error}</p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setError(null); setWeather(null); loadWeather(); }}
+                      className="text-xs px-2 py-1 rounded hover:bg-gray-200"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
                 )}
-              </p>
-            )}
-          </div>
+                {!error && (
+                  <p className="text-lg font-bold text-theme">
+                    {weather ? `${Math.round(weather.temp)}°C` : '--'} 
+                    <span className="text-xs text-gray-500 ml-2">
+                      {weather ? `Max ${Math.round(weather.tmax)}° / Min ${Math.round(weather.tmin)}°` : ''}
+                    </span>
+                    {weather?.source === 'backup' && (
+                      <span className="block text-[10px] text-orange-500 font-normal">
+                        ⚠️ Fuente alternativa
+                      </span>
+                    )}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
         </div>
         <div>
           {expanded ? <ChevronUpIcon className="text-muted" /> : <ChevronDownIcon className="text-muted" />}
