@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '../hooks/useStore.jsx';
 import WeatherWidget from './WeatherWidget.jsx';
 import CalendarModal from './CalendarModal.jsx';
+import ReportesModal from './ReportesModal.jsx';
 
 export default function Dashboard() {
   const { clientes, getCitasHoy, getIngresosEstimados, config, getAguaMovidaMensual } = useAppStore();
@@ -13,7 +14,8 @@ export default function Dashboard() {
   const aguaMovida = getAguaMovidaMensual();
   const moneda = config?.moneda || 'ARS';
   const [showCal, setShowCal] = useState(false);
-  const [showTarifario, setShowTarifario] = useState(false); // Estado local para abrir tarifario
+  const [showTarifario, setShowTarifario] = useState(false);
+  const [showReportes, setShowReportes] = useState(false);
 
   // Formatear litros a m³ si es muy grande
   const aguaDisplay = aguaMovida >= 1000 
@@ -23,6 +25,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {showCal && <CalendarModal onClose={() => setShowCal(false)} />}
+      {showReportes && <ReportesModal onClose={() => setShowReportes(false)} />}
       
       {/* 1. Resumen (Stats) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -104,14 +107,17 @@ export default function Dashboard() {
               <svg className="w-5 h-5 text-muted group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </button>
           
-          <div className="card p-4 rounded-2xl shadow-sm border border-theme flex items-center gap-3 opacity-50">
+          <div 
+            className="card p-4 rounded-2xl shadow-sm border border-theme flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            onClick={() => setShowReportes(true)}
+          >
               {/* Placeholder para futura feature */}
-              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+              <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
               </div>
               <div className="text-left">
-                  <span className="block text-sm font-bold text-muted">Reportes</span>
-                  <span className="block text-[10px] text-muted">Próximamente</span>
+                  <span className="block text-sm font-bold text-theme">Reportes</span>
+                  <span className="block text-[10px] text-muted">Ver estadísticas</span>
               </div>
           </div>
       </div>

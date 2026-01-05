@@ -35,10 +35,13 @@ export default function TarifarioModal({ onClose }) {
                 <span className="text-sm text-gray-400 font-medium">{moneda}</span>
                 <input
                   type="number"
+                  inputMode="numeric"
                   className="w-28 p-2 rounded-lg text-right font-bold bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
                   value={item.precioBase}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => {
-                    const val = parseFloat(e.target.value) || 0;
+                    const valStr = e.target.value;
+                    const val = valStr === '' ? 0 : parseFloat(valStr);
                     const next = [...localTarifario];
                     next[idx] = { ...next[idx], precioBase: val };
                     setLocalTarifario(next);
