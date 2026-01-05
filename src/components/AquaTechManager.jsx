@@ -43,70 +43,97 @@ function AppShell() {
         return (
             <div className="space-y-6 pb-20">
                 {/* Detalle del Cliente */}
-                <div className="card p-4 rounded-xl shadow-sm">
-                    <h2 className="text-2xl font-bold text-theme">{clienteSeleccionado.nombre}</h2>
-                    <p className="text-muted">{clienteSeleccionado.direccion}</p>
-                    <div className="mt-2 flex gap-2">
+                <div className="card p-5 rounded-2xl shadow-sm border border-theme">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h2 className="text-2xl font-bold text-theme leading-tight">{clienteSeleccionado.nombre}</h2>
+                            <p className="text-muted text-sm mt-1">{clienteSeleccionado.direccion || 'Sin dirección'}</p>
+                        </div>
+                        <button 
+                            onClick={() => setClienteSeleccionado(null)}
+                            className="bg-gray-100 dark:bg-gray-800 p-2 rounded-full text-muted hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+
+                    <div className="mt-4 flex gap-3">
                         <a 
                             href={`https://wa.me/${clienteSeleccionado.telefono}`} 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 bg-green-500 text-white text-center py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+                            className="flex-1 bg-green-500 text-white py-2.5 rounded-xl text-sm font-bold text-center hover:bg-green-600 transition-colors shadow-sm active:scale-95"
                         >
                             WhatsApp
                         </a>
                         <a 
                             href={`tel:${clienteSeleccionado.telefono}`}
-                            className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-center py-2 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            className="flex-1 bg-gray-100 dark:bg-gray-700 text-theme py-2.5 rounded-xl text-sm font-bold text-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors shadow-sm active:scale-95"
                         >
                             Llamar
                         </a>
                     </div>
-                    <div className="mt-4">
-                      <label className="block text-xs font-semibold text-muted uppercase tracking-wider ml-1">Notas</label>
+
+                    <div className="mt-5 pt-4 border-t border-theme/50">
+                      <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Notas Privadas</label>
                       <textarea
-                        className="w-full mt-1 p-3 border border-theme rounded-lg bg-surface text-theme placeholder-gray-400"
-                        rows={3}
+                        className="w-full p-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-theme text-theme placeholder-gray-400 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        rows={2}
                         value={clienteSeleccionado.notas || ''}
                         onChange={(e) => {
                           const notas = e.target.value;
                           actualizarCliente(clienteSeleccionado.id, { notas });
                           setClienteSeleccionado({ ...clienteSeleccionado, notas });
                         }}
-                        placeholder="Ej: Entrar por pasillo lateral. Perro suelto los martes."
+                        placeholder="Códigos de acceso, horarios, mascotas..."
                       />
                     </div>
                 </div>
 
-                {/* Calculadora */}
-                <CalculadoraQuimica 
-                    cliente={clienteSeleccionado} 
-                    onGuardarMedicion={handleGuardarMedicion}
-                />
+                {/* Calculadora (Integrada visualmente) */}
+                <div className="card p-5 rounded-2xl shadow-sm border border-theme">
+                    <CalculadoraQuimica 
+                        cliente={clienteSeleccionado} 
+                        onGuardarMedicion={handleGuardarMedicion}
+                    />
+                </div>
 
                 {/* Historial */}
-                <div>
-                    <h3 className="text-lg font-bold text-theme mb-3">Historial de Visitas</h3>
-                    <div className="space-y-3">
-                        {historial.length === 0 && <p className="text-muted text-sm">Sin visitas registradas.</p>}
-                        {historial.map(visita => (
-                            <div key={visita.id} className="card p-3 rounded-lg shadow-sm border-l-4 border-indigo-400">
-                                <div className="flex justify-between text-xs text-muted mb-1">
-                                    <span>{new Date(visita.fecha).toLocaleDateString()}</span>
-                                    <span>{new Date(visita.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                <div className="card p-5 rounded-2xl shadow-sm border border-theme">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-theme">Historial</h3>
+                        <span className="text-xs font-medium text-muted bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-lg">
+                            {historial.length} visitas
+                        </span>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        {historial.length === 0 && (
+                            <div className="text-center py-8">
+                                <div className="bg-gray-50 dark:bg-gray-800 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <svg className="w-6 h-6 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
-                                <p className="font-medium text-theme">{visita.tipo}</p>
-                                <p className="text-sm text-muted mt-1">{visita.notas}</p>
+                                <p className="text-muted text-sm">No hay visitas registradas aún.</p>
+                            </div>
+                        )}
+                        {historial.map(visita => (
+                            <div key={visita.id} className="relative pl-4 border-l-2 border-blue-200 dark:border-blue-800 py-1">
+                                <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-blue-500 border-2 border-surface"></div>
+                                <div className="flex justify-between items-start mb-1">
+                                    <p className="font-bold text-theme text-sm">{visita.tipo}</p>
+                                    <span className="text-xs text-muted">{new Date(visita.fecha).toLocaleDateString()}</span>
+                                </div>
+                                <p className="text-xs text-muted leading-relaxed">{visita.notas}</p>
                                 {visita.valores && (
-                                    <div className="mt-2 flex gap-2 text-xs">
-                                        {visita.valores.ph && <span className="bg-gray-100 dark:bg-gray-700 text-theme px-2 py-1 rounded">pH: {visita.valores.ph}</span>}
-                                        {visita.valores.cloro && <span className="bg-gray-100 dark:bg-gray-700 text-theme px-2 py-1 rounded">Cl: {visita.valores.cloro}</span>}
+                                    <div className="mt-2 flex gap-2">
+                                        {visita.valores.ph && <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">pH {visita.valores.ph}</span>}
+                                        {visita.valores.cloro && <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">Cl {visita.valores.cloro}</span>}
                                     </div>
                                 )}
                                 {visita.photos && visita.photos.length > 0 && (
-                                  <div className="mt-2 flex gap-2">
+                                  <div className="mt-2 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                                     {visita.photos.slice(0,3).map((src, idx) => (
-                                      <img key={idx} src={src} alt="visita" className="w-16 h-16 object-cover rounded" />
+                                      <img key={idx} src={src} alt="visita" className="w-12 h-12 object-cover rounded-lg border border-theme" />
                                     ))}
                                   </div>
                                 )}
