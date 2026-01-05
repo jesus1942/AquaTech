@@ -22,6 +22,9 @@ function useLocalStorage(key, initialValue) {
       }
     } catch (error) {
       console.log(error);
+      if (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+          alert("⚠️ Espacio lleno. No se pueden guardar más fotos o datos. Intenta borrar visitas antiguas.");
+      }
     }
   };
 
