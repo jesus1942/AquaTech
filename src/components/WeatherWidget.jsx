@@ -65,7 +65,7 @@ export default function WeatherWidget() {
       
       try {
         const res = await Promise.race([fetch(url), timeout(3000)]);
-        if (!res.ok) throw new Error('API Error');
+        if (!res.ok) throw new Error('API Error ' + res.status);
         const data = await res.json();
         
         const weatherData = {
@@ -95,8 +95,11 @@ export default function WeatherWidget() {
         if (hasCache) return;
         
         try {
-          const timeoutFallback = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Fallback')), ms));
-          const res2 = await Promise.race([fetch(`https://wttr.in/${lat},${lon}?format=j1`), timeoutFallback(3000)]);
+          // Usar HTTPS explícitamente y añadir encabezados para evitar problemas de CORS/Mixed Content
+          const res2 = await Promise.race([
+              fetch(`https://wttr.in/${lat},${lon}?format=j1`, { mode: 'cors' }), 
+              timeout(3000)
+          ]);
           
           if (!res2.ok) throw new Error('Fallback failed');
           const data2 = await res2.json();

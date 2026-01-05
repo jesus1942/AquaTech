@@ -13,6 +13,7 @@ export default function Dashboard() {
   const aguaMovida = getAguaMovidaMensual();
   const moneda = config?.moneda || 'ARS';
   const [showCal, setShowCal] = useState(false);
+  const [showTarifario, setShowTarifario] = useState(false); // Estado local para abrir tarifario
 
   // Formatear litros a m³ si es muy grande
   const aguaDisplay = aguaMovida >= 1000 
@@ -25,6 +26,7 @@ export default function Dashboard() {
       
       {/* 1. Resumen (Stats) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* ... stats existentes ... */}
         <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center">
           <p className="text-xs text-muted uppercase tracking-wider mb-1">Citas Hoy</p>
           <p className="text-2xl font-bold text-theme">{citasHoy.length}</p>
@@ -33,7 +35,8 @@ export default function Dashboard() {
           <p className="text-xs text-muted uppercase tracking-wider mb-1">Clientes</p>
           <p className="text-2xl font-bold text-theme">{clientes.length}</p>
         </div>
-        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center">
+        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" onClick={() => document.getElementById('tarifario-btn')?.click()}>
+           {/* Hacemos click en el boton del header indirectamente o mostramos el modal directo si tuvieramos acceso al setter global, pero aqui usaremos un link visual */}
           <p className="text-xs text-muted uppercase tracking-wider mb-1">Ingresos</p>
           <p className="text-xl font-bold text-green-600 dark:text-green-400">
             {Math.round(ingresosHoy).toLocaleString()} <span className="text-xs font-normal text-muted">{moneda}</span>
@@ -48,6 +51,7 @@ export default function Dashboard() {
       </div>
 
       {/* 2. Próximas Citas */}
+      {/* ... */}
       <div className="card rounded-2xl p-5 shadow-sm border border-theme">
         <div className="flex justify-between items-center mb-4">
             <h3 className="text-sm font-bold text-theme uppercase tracking-wider">Próximas Citas</h3>
@@ -76,6 +80,40 @@ export default function Dashboard() {
             </div>
           )}
         </ul>
+      </div>
+      
+      {/* Accesos Rápidos */}
+      <div className="grid grid-cols-2 gap-3">
+          <button 
+            // Este botón abrirá el modal de tarifario que está en App.jsx. 
+            // Como no tenemos acceso directo al state de App.jsx, usaremos un evento custom o mejor,
+            // agregamos una nota visual de que está arriba.
+            // O mejor aún, agregamos un botón en Dashboard que muestre un resumen de costos rápido.
+             className="card p-4 rounded-2xl shadow-sm border border-theme flex items-center justify-between group hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+             onClick={() => document.getElementById('tarifario-trigger')?.click()}
+          >
+              <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <div className="text-left">
+                      <span className="block text-sm font-bold text-theme group-hover:text-blue-600 transition-colors">Ver Costos</span>
+                      <span className="block text-[10px] text-muted">Tarifario Base</span>
+                  </div>
+              </div>
+              <svg className="w-5 h-5 text-muted group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </button>
+          
+          <div className="card p-4 rounded-2xl shadow-sm border border-theme flex items-center gap-3 opacity-50">
+              {/* Placeholder para futura feature */}
+              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+              </div>
+              <div className="text-left">
+                  <span className="block text-sm font-bold text-muted">Reportes</span>
+                  <span className="block text-[10px] text-muted">Próximamente</span>
+              </div>
+          </div>
       </div>
 
       {/* 3. Clima */}

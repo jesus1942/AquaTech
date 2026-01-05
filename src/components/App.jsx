@@ -39,6 +39,9 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {showTarifario && <TarifarioModal onClose={() => setShowTarifario(false)} />}
       
+      {/* Hidden button trigger for Dashboard access */}
+      <button id="tarifario-trigger" className="hidden" onClick={() => setShowTarifario(true)} />
+
       {/* Header Mobile First */}
       <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <div className="max-w-md mx-auto flex justify-between items-center">
