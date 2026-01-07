@@ -236,7 +236,7 @@ function WeatherWidgetContent() {
       </div>
 
       {expanded && weather && !error && (
-        <div className="mt-4 pt-4 border-t border-theme animate-fade-in-up">
+        <div className="mt-4 pt-4 border-t border-theme">
           {/* Header de Configuración de Ubicación (Minimalista) */}
           <div className="flex items-center justify-between mb-4" onClick={e => e.stopPropagation()}>
              <div className="flex items-center gap-2">
@@ -259,7 +259,7 @@ function WeatherWidgetContent() {
 
           {/* Panel de Configuración Desplegable */}
           {showLocationSettings && (
-            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-theme/50 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-theme/50" onClick={e => e.stopPropagation()}>
               <div className="flex flex-col gap-3">
                 {/* Opción 1: Ciudad o GPS */}
                 <div className="flex gap-2">
