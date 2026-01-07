@@ -5,7 +5,7 @@ import {
   WindIcon, DropIcon, GaugeIcon, ChevronDownIcon, ChevronUpIcon 
 } from './icons.jsx';
 
-export default function WeatherWidget() {
+function WeatherWidgetContent() {
   const { config, setConfig } = useAppStore();
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
@@ -68,21 +68,26 @@ export default function WeatherWidget() {
         if (!res.ok) throw new Error('API Error ' + res.status);
         const data = await res.json();
         
+        // Validación estricta de estructura antes de mapear
+        if (!data?.current || !data?.daily?.time || !data?.daily?.temperature_2m_max) {
+             throw new Error('Datos incompletos');
+        }
+
         const weatherData = {
-          temp: data?.current?.temperature_2m,
-          isDay: data?.current?.is_day,
-          tmax: data?.daily?.temperature_2m_max?.[0],
-          tmin: data?.daily?.temperature_2m_min?.[0],
-          code: data?.current?.weathercode ?? data?.daily?.weathercode?.[0],
-          humidity: data?.current?.relative_humidity_2m,
-          pressure: data?.current?.surface_pressure,
-          wind: data?.current?.wind_speed_10m,
-          uv: data?.daily?.uv_index_max?.[0],
-          forecast: data?.daily?.time?.slice(1, 6).map((t, i) => ({
+          temp: data.current.temperature_2m,
+          isDay: data.current.is_day,
+          tmax: data.daily.temperature_2m_max?.[0],
+          tmin: data.daily.temperature_2m_min?.[0],
+          code: data.current.weathercode ?? data.daily.weathercode?.[0],
+          humidity: data.current.relative_humidity_2m,
+          pressure: data.current.surface_pressure,
+          wind: data.current.wind_speed_10m,
+          uv: data.daily.uv_index_max?.[0],
+          forecast: data.daily.time.slice(1, 6).map((t, i) => ({
             date: t,
-            max: data.daily.temperature_2m_max[i + 1],
-            min: data.daily.temperature_2m_min[i + 1],
-            code: data.daily.weathercode[i + 1]
+            max: data.daily.temperature_2m_max?.[i + 1],
+            min: data.daily.temperature_2m_min?.[i + 1],
+            code: data.daily.weathercode?.[i + 1]
           }))
         };
 
@@ -91,11 +96,9 @@ export default function WeatherWidget() {
         setError(null);
       } catch (err) {
         console.warn('Open-Meteo falló, probando wttr.in...', err);
-        // Si falla y teníamos caché, nos quedamos con el caché (silenciosamente)
         if (hasCache) return;
         
         try {
-          // Usar HTTPS explícitamente y añadir encabezados para evitar problemas de CORS/Mixed Content
           const res2 = await Promise.race([
               fetch(`https://wttr.in/${lat},${lon}?format=j1`, { mode: 'cors' }), 
               timeout(3000)
@@ -103,6 +106,12 @@ export default function WeatherWidget() {
           
           if (!res2.ok) throw new Error('Fallback failed');
           const data2 = await res2.json();
+          
+          // Validación estricta para fallback
+          if (!data2?.current_condition?.[0] || !data2?.weather?.[0]) {
+              throw new Error('Datos fallback incompletos');
+          }
+
           const current = data2.current_condition[0];
           const daily = data2.weather[0];
           
@@ -385,4 +394,42 @@ export default function WeatherWidget() {
       )}
     </div>
   );
+}
+
+class WeatherErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("WeatherWidget crashed:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="card rounded-2xl p-4 shadow-sm bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800">
+            <div className="flex items-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                <div>
+                    <p className="text-sm font-bold text-red-600 dark:text-red-400">Error en Clima</p>
+                    <button 
+                        onClick={() => this.setState({ hasError: false })}
+                        className="text-xs text-red-500 underline mt-1"
+                    >
+                        Reintentar
+                    </button>
+                </div>
+            </div>
+        </div>
+      );
+    }
+
+    return this.props.children; 
+  }
 }
