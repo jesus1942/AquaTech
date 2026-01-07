@@ -156,6 +156,19 @@ export default function WeatherWidget() {
     return <MoonIcon className="w-8 h-8 text-gray-600" />;
   })();
 
+  const formatDateSafe = (dateStr) => {
+    try {
+      if (!dateStr) return '';
+      // Asegurar compatibilidad safari reemplazando guiones por barras si es necesario, 
+      // aunque YYYY-MM-DD suele ser soportado. Mejor instanciar con partes.
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return 'N/A';
+      return d.toLocaleDateString('es-ES', { weekday: 'long' });
+    } catch (e) {
+      return '';
+    }
+  };
+
   return (
     <div 
       className={`card rounded-2xl p-4 shadow-sm transition-all duration-300 cursor-pointer ${expanded ? 'bg-white/50 dark:bg-black/20' : ''}`}
@@ -191,9 +204,11 @@ export default function WeatherWidget() {
                 )}
                 {!error && (
                   <p className="text-lg font-bold text-theme">
-                    {weather ? `${Math.round(weather.temp)}°C` : '--'} 
+                    {weather?.temp !== undefined ? `${Math.round(weather.temp)}°C` : '--'} 
                     <span className="text-xs text-gray-500 ml-2">
-                      {weather ? `Max ${Math.round(weather.tmax)}° / Min ${Math.round(weather.tmin)}°` : ''}
+                      {weather?.tmax !== undefined && weather?.tmin !== undefined 
+                        ? `Max ${Math.round(weather.tmax)}° / Min ${Math.round(weather.tmin)}°` 
+                        : ''}
                     </span>
                     {weather?.source === 'backup' && (
                       <span className="block text-[10px] text-orange-500 font-normal">
@@ -328,22 +343,22 @@ export default function WeatherWidget() {
             <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
               <WindIcon className="w-5 h-5 mx-auto text-blue-400 mb-1" />
               <span className="text-xs text-muted block">Viento</span>
-              <span className="text-xs font-bold text-theme">{Math.round(weather.wind)} km/h</span>
+              <span className="text-xs font-bold text-theme">{weather.wind !== undefined ? Math.round(weather.wind) : '-'} <span className="text-[10px]">km/h</span></span>
             </div>
             <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
               <DropIcon className="w-5 h-5 mx-auto text-blue-400 mb-1" />
               <span className="text-xs text-muted block">Humedad</span>
-              <span className="text-xs font-bold text-theme">{weather.humidity}%</span>
+              <span className="text-xs font-bold text-theme">{weather.humidity !== undefined ? weather.humidity : '-'}%</span>
             </div>
             <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
               <GaugeIcon className="w-5 h-5 mx-auto text-purple-400 mb-1" />
               <span className="text-xs text-muted block">Presión</span>
-              <span className="text-xs font-bold text-theme">{Math.round(weather.pressure)} hPa</span>
+              <span className="text-xs font-bold text-theme">{weather.pressure !== undefined ? Math.round(weather.pressure) : '-'} <span className="text-[10px]">hPa</span></span>
             </div>
             <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-xl">
               <SunIcon className="w-5 h-5 mx-auto text-orange-400 mb-1" />
               <span className="text-xs text-muted block">UV</span>
-              <span className="text-xs font-bold text-theme">{weather.uv?.toFixed(1) || '-'}</span>
+              <span className="text-xs font-bold text-theme">{weather.uv !== undefined ? weather.uv.toFixed(1) : '-'}</span>
             </div>
           </div>
 
@@ -352,13 +367,13 @@ export default function WeatherWidget() {
           <div className="space-y-2">
             {weather.forecast?.map((day, idx) => (
               <div key={idx} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                <span className="text-sm text-theme w-24">
-                  {new Date(day.date).toLocaleDateString('es-ES', { weekday: 'long' })}
+                <span className="text-sm text-theme w-24 capitalize">
+                  {formatDateSafe(day.date)}
                 </span>
                 {getWeatherIcon(day.code)}
                 <div className="flex gap-3 text-sm">
-                  <span className="font-bold text-theme">{Math.round(day.max)}°</span>
-                  <span className="text-muted">{Math.round(day.min)}°</span>
+                  <span className="font-bold text-theme">{day.max !== undefined ? Math.round(day.max) : '-'}°</span>
+                  <span className="text-muted">{day.min !== undefined ? Math.round(day.min) : '-'}°</span>
                 </div>
               </div>
             ))}
