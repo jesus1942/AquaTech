@@ -204,8 +204,8 @@ function WeatherWidgetContent() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm text-muted">{error}</p>
                     <button
-                      onClick={(e) => { e.stopPropagation(); setError(null); setWeather(null); loadWeather(); }}
-                      className="text-xs px-2 py-1 rounded hover:bg-gray-200"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setError(null); setWeather(null); loadWeather(); }}
+                      className="text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg font-bold hover:bg-blue-200 transition-colors z-[1000] relative"
                     >
                       Reintentar
                     </button>

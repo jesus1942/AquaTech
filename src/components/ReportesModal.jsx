@@ -55,7 +55,7 @@ export default function ReportesModal({ onClose }) {
   }, [visitas, clientes]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm" style={{ zIndex: 9999 }}>
       <div className="bg-white dark:bg-gray-900 w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl border-t sm:border border-gray-200 dark:border-gray-800 overflow-hidden max-h-[90vh] flex flex-col">
         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-black/20">
           <div>

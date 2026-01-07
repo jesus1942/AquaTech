@@ -40,7 +40,10 @@ export default function Dashboard() {
           <p className="text-xs text-muted uppercase tracking-wider mb-1">Clientes</p>
           <p className="text-2xl font-bold text-theme">{clientes.length}</p>
         </div>
-        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" onClick={() => setShowTarifario(true)}>
+        <div 
+          className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative" 
+          onClick={(e) => { e.preventDefault(); setShowTarifario(true); }}
+        >
            {/* Click directo para abrir tarifario */}
           <p className="text-xs text-muted uppercase tracking-wider mb-1">Ingresos</p>
           <p className="text-xl font-bold text-green-600 dark:text-green-400">
@@ -90,8 +93,8 @@ export default function Dashboard() {
       {/* Accesos Rápidos */}
       <div className="grid grid-cols-2 gap-3">
           <button 
-             className="card p-4 rounded-2xl shadow-sm border border-theme flex items-center justify-between group hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-             onClick={() => setShowTarifario(true)}
+             className="card p-4 rounded-2xl shadow-sm border border-theme flex items-center justify-between group hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-full text-left relative"
+             onClick={(e) => { e.preventDefault(); setShowTarifario(true); }}
           >
               <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
