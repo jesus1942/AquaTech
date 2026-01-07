@@ -4,12 +4,32 @@ import { useAppStore } from '../hooks/useStore';
 export default function TarifarioModal({ onClose }) {
   const { tarifario, setTarifario, config } = useAppStore();
   const moneda = config?.moneda || 'ARS';
-  const [localTarifario, setLocalTarifario] = useState(tarifario);
+  
+  // Inicializar estado con fallback por si tarifario es null/undefined
+  const [localTarifario, setLocalTarifario] = useState(() => {
+    if (Array.isArray(tarifario)) return tarifario;
+    return [];
+  });
+
+  // Si el store se actualiza (o carga tarde), actualizar local si no hemos editado aun?
+  // Mejor no sobreescribir edición en curso. 
+  // Pero si llega null, mostrar loading o error.
 
   const handleSave = () => {
     setTarifario(localTarifario);
     onClose();
   };
+
+  if (!Array.isArray(localTarifario) || localTarifario.length === 0) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+             <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl">
+                 <p className="text-red-500 mb-4">Error: No hay datos de tarifario.</p>
+                 <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded-lg">Cerrar</button>
+             </div>
+        </div>
+      );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
