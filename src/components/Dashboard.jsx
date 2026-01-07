@@ -3,6 +3,7 @@ import { useAppStore } from '../hooks/useStore.jsx';
 import WeatherWidget from './WeatherWidget.jsx';
 import CalendarModal from './CalendarModal.jsx';
 import ReportesModal from './ReportesModal.jsx';
+import TarifarioModal from './TarifarioModal.jsx';
 
 export default function Dashboard() {
   const { clientes, getCitasHoy, getIngresosEstimados, config, getAguaMovidaMensual } = useAppStore();
@@ -26,6 +27,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       {showCal && <CalendarModal onClose={() => setShowCal(false)} />}
       {showReportes && <ReportesModal onClose={() => setShowReportes(false)} />}
+      {showTarifario && <TarifarioModal onClose={() => setShowTarifario(false)} />}
       
       {/* 1. Resumen (Stats) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -38,8 +40,8 @@ export default function Dashboard() {
           <p className="text-xs text-muted uppercase tracking-wider mb-1">Clientes</p>
           <p className="text-2xl font-bold text-theme">{clientes.length}</p>
         </div>
-        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" onClick={() => document.getElementById('tarifario-btn')?.click()}>
-           {/* Hacemos click en el boton del header indirectamente o mostramos el modal directo si tuvieramos acceso al setter global, pero aqui usaremos un link visual */}
+        <div className="card rounded-2xl p-4 shadow-sm flex flex-col justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" onClick={() => setShowTarifario(true)}>
+           {/* Click directo para abrir tarifario */}
           <p className="text-xs text-muted uppercase tracking-wider mb-1">Ingresos</p>
           <p className="text-xl font-bold text-green-600 dark:text-green-400">
             {Math.round(ingresosHoy).toLocaleString()} <span className="text-xs font-normal text-muted">{moneda}</span>
@@ -88,12 +90,8 @@ export default function Dashboard() {
       {/* Accesos Rápidos */}
       <div className="grid grid-cols-2 gap-3">
           <button 
-            // Este botón abrirá el modal de tarifario que está en App.jsx. 
-            // Como no tenemos acceso directo al state de App.jsx, usaremos un evento custom o mejor,
-            // agregamos una nota visual de que está arriba.
-            // O mejor aún, agregamos un botón en Dashboard que muestre un resumen de costos rápido.
              className="card p-4 rounded-2xl shadow-sm border border-theme flex items-center justify-between group hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-             onClick={() => document.getElementById('tarifario-trigger')?.click()}
+             onClick={() => setShowTarifario(true)}
           >
               <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">

@@ -64,7 +64,7 @@ function WeatherWidgetContent() {
       const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms));
       
       try {
-        const res = await Promise.race([fetch(url), timeout(3000)]);
+        const res = await Promise.race([fetch(url), timeout(8000)]);
         if (!res.ok) throw new Error('API Error ' + res.status);
         const data = await res.json();
         
@@ -101,7 +101,7 @@ function WeatherWidgetContent() {
         try {
           const res2 = await Promise.race([
               fetch(`https://wttr.in/${lat},${lon}?format=j1`, { mode: 'cors' }), 
-              timeout(3000)
+              timeout(8000)
           ]);
           
           if (!res2.ok) throw new Error('Fallback failed');
